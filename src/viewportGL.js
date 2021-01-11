@@ -152,9 +152,9 @@ class ViewPortGL {
         ]
     }
 
-    setTriangles = (coordsAndColors, sizeOfVec) => {
+    setTriangles = (coordsAndColors) => {
 
-        this.numOfPoints = coordsAndColors.length/sizeOfVec;
+        this.numOfPoints = coordsAndColors.length/6;
 
         this.gl.deleteBuffer(this.TriangleVerBufObj);
 

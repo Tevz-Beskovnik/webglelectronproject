@@ -231,6 +231,11 @@ class ViewPortGL {
             points2[2] = (points2[2] - Zml) * 10;
             points3[2] = (points3[2] - Zml) * 10;
 
+            /*
+                First three values are calculated points for the trinagles,
+                the second three points are the RGB values in decimal
+                for now its hardcoded will change later
+            */
             vertexPointsCols.push(
                 points1[0], points1[1], points1[2], 1.0, 0.0, 0.0,
                 points2[0], points2[1], points2[2], 0.0, 1.0, 0.0,

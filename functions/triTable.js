@@ -1,9 +1,9 @@
 /*
-    Triangulation table, naret za
+    Triangulation table, vrne stranice, ki se navezujejo na določene točke;
 */
 
 module.exports = {
-    triTable = () => {
+    triTable: () => {
         return [
             [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
             [0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],

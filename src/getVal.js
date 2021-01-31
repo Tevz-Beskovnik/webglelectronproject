@@ -1,13 +1,15 @@
 const element = document.getElementById("lol");
-const viewPort = require('./viewport');
-const { min, max, floor, abs } = Math
-const { getPoints } = require('./points');
-const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('./matrix');
-const matrixes = require('./matrix');
-const points = require('./points');
-const viewPortGL = require("./viewportGL");
+const viewPort = require('../functions/viewport');
+const { min, max, floor, abs, sqrt } = Math
+const { getPoints } = require('../functions/points');
+const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('../functions/matrix');
+const matrixes = require('../functions/matrix');
+const points = require('../functions/points');
+const viewPortGL = require("../functions/viewportGL");
+const CubeTriCoords = require("../functions/CubeTriCoords");
+const displayNum = 1;
 
-let sides = [
+const cubeSides = [
     //SOUTH
     [ [-0.5 , -0.5 , -0.5] ,    [-0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , -0.5]  ],
     [ [-0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , -0.5] ,    [0.5 , -0.5 , -0.5]  ],
@@ -27,6 +29,8 @@ let sides = [
     [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5]  ],
     [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5] ,    [0.5 , -0.5 , -0.5]  ]
 ]
+
+let marchCubArr = [];
 /*
 
     1 x 1 x 1
@@ -51,15 +55,29 @@ let sides = [
 /*let vp = new viewPort(200, 200, 60, 90);
 let projMat = vp.projectionMatrix();*/
 
-let vpGL = new viewPortGL(500, 800, 60, 90, "canv");
-let projMat = vpGL.projectionMatrix();
+const h = 7
+const w = 7
+const l = 7
+
+const MarchTriCoords = new CubeTriCoords(w, h, l, 0);
+
+const vpGL = new viewPortGL(730, 1490, 60, 90, "canv", 17);
 
 let rotZM = 0.0;
 let rotXM = 0.0;
 let rotYM = 0.0;
-let upscaleMult = 0.001;
-let hdv = 0.8;
-let mv = 0;
+let zoom = 17.0;
+
+for(let i = 0; i<w-1; i++){
+    for(let j = 0; j<h-1; j++){
+        for(let u = 0; u<l-1; u++){
+            let point = MarchTriCoords.getTriArrs(i, j, u)
+            point.length > 0 ? marchCubArr.push(...point) : 0;
+        }
+    }
+}
+
+console.log(marchCubArr)
 
 document.addEventListener('keydown', (e) => {
     e = e || window.event;
@@ -75,14 +93,32 @@ document.addEventListener('keydown', (e) => {
     }else if(e.key == "s"){
         rotXM += 0.1;
     }
+
+    if(e.key == "z"){
+        zoom+=0.1;
+    }
+
+    if(e.key == "o"){
+        zoom-=0.1;
+    }
 });
 
-setInterval(()=> {
+if(displayNum == 0){
+    setInterval(()=> {
+        vpGL.vertex3DCalc(cubeSides, rotXM, rotYM, rotZM, zoom);
 
-    vpGL.vertex3DCalc(sides, rotXM, rotYM, rotZM);
+        vpGL.draw([
+            0.75, 0.85, 0.8, 1.0
+        ]);
 
-    vpGL.draw([
-        0.75, 0.85, 0.8, 1.0
-    ]);
+    }, 50);
+}else{
+    setInterval(()=> {
+        vpGL.vertex3DCalc(marchCubArr, rotXM, rotYM, rotZM, zoom);
 
-}, 50);
+        vpGL.draw([
+            0.75, 0.85, 0.8, 1.0
+        ]);
+
+    }, 50);
+}

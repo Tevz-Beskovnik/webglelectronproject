@@ -12,13 +12,15 @@ Array.prototype.insert = function ( index, item ) {
 };
 
 class ViewPortGL {
-    constructor(height, width, refreshRate, fov, canvasID) {
+    constructor(height, width, refreshRate, fov, canvasID, ZoomOut) {
 
         /*
             Viewport settings
         */
         
        this.rfr = refreshRate;
+
+       this.ZoomOut = ZoomOut || 3;
 
        this.h = height;
 
@@ -182,16 +184,17 @@ class ViewPortGL {
             this.gl.FLOAT,
             this.gl.FALSE,
             6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
-            3 * Float32Array.BYTES_PER_ELEMENT// offset from the coordinates in bits to the color values so 2 skips :)
+            3 * Float32Array.BYTES_PER_ELEMENT// offset from the coordinates in bits to the color values so 3 skips :)
         );
 
         this.gl.enableVertexAttribArray(positionAttrLoc);
         this.gl.enableVertexAttribArray(colorAttrLoc);
     }
 
-    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN) => {
+    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom) => {
 
         let Zml = 0.9;
+        let ZoomOut = zoom;
 
         let vertexPointsCols = [];
 
@@ -219,9 +222,9 @@ class ViewPortGL {
             let translated2 = points2;
             let translated3 = points3;
 
-            translated1[2] += 3;
-            translated2[2] += 3;
-            translated3[2] += 3;
+            translated1[2] += ZoomOut;
+            translated2[2] += ZoomOut;
+            translated3[2] += ZoomOut;
 
             points1 = customVecMultiply(projMat, translated1);
             points2 = customVecMultiply(projMat, translated2);

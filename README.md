@@ -4,7 +4,7 @@
 
 ## Javascript simplified webGL viewport
 
-  the constructor takes in a few values like **height** and **width** of the canvas the **refresh rate** *(does nothing for now)*, the **fov** and **canvasID** the ID of the canvas.
+  The constructor takes in a few values like **height** and **width** of the canvas the **refresh rate** *(does nothing for now)*, the **fov** and **canvasID** the ID of the canvas.
 
 ### Integrated functions
 
@@ -17,3 +17,18 @@
 
 **This is what the demo looks like, it can be rotated in 3D space with the A, W, S, D keys:**
 ![](https://github.com/Tevzi2/webglelectronproject/blob/master/demo1.png)
+
+## Marching cubes alghorithm
+
+### What is the marching cubes alghorith?
+
+  The marching cubes alghorithm takes a number of points and the accoring to your surface level draws a terrain based on a triangulation table (this is a poor explenation, but it's the best i can do since im a amature)
+  
+### Cubes class
+*(This is an extreamly early version of this and im almost 100% certain that im not correctly sampeling the noise)*
+
+* **constructor** Takes in a width, height, length and density parameter.
+* **getTriArrs** Takes in x, y, z, return an array of triangles.
+
+### Demo using the viewportGL to render
+![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes.png)

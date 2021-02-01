@@ -30,4 +30,4 @@
 * **getTriArrs** Takes in x, y, z, return an array of triangles.
 
 ### Demo using perlin nose and the viewportGL class to render
-![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes.png)
+![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes1.png)

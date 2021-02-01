@@ -9,10 +9,11 @@
   <body>
     <canvas id="canv"></canvas>
     <div class="sliders">
-      <p>X and Y mod</p>
-      <input type="range" id="rangeMod" min="0" max="1000">
+      <p id="range">X and Y mod: 0</p>
+      <button onclick="addRange();">Add</button><button onclick="removeRange();">Subtract</button>
       <p>Range</p>
       <input type="range" id="densityMod" min="0" max="100">
+      <p>re-draw the cube</p>
       <button id="Redraw" onclick="redraw();">Redraw</button>
     </div>
   </body>

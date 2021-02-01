@@ -8,7 +8,13 @@ const viewPortGL = require("../functions/viewportGL");
 const CubeTriCoords = require("../functions/CubeTriCoords");
 const perlinNoise = require("perlin-noise-3d");
 const noise = new perlinNoise(Math.random()*120482);
-const displayNum = 0;
+const displayNum = 1;
+var range = 0;
+
+const Alea = require("alea");
+var random = new Alea(11204481988);
+const simplexNoise = require("simplex-noise");
+const simplex = new simplexNoise(random);
 
 const cubeSides = [
     //SOUTH
@@ -60,7 +66,7 @@ const h = 30
 const w = 30
 const l = 30
 
-const MarchTriCoords = new CubeTriCoords(w, h, l, 0.4, 10, noise);
+const MarchTriCoords = new CubeTriCoords(w, h, l, 0.4, 0, noise);
 
 const vpGL = new viewPortGL(730, 1490, 60, 90, "canv", 17);
 
@@ -124,13 +130,30 @@ if(displayNum == 0){
     }, 50);
 }
 
+
+
+function addRange(){
+    let div = document.getElementById("range")
+
+    range+=1;
+
+    div.innerHTML = "X and Y mod: " + range;
+}
+
+function removeRange(){
+    let div = document.getElementById("range")
+
+    range-=1;
+
+    div.innerHTML = "X and Y mod: " + range;
+}
+
 function redraw(){
-    var rangeXY = document.getElementById("rangeMod").value;
     var rangeDens = document.getElementById("densityMod").value/100;
 
-    console.log(rangeXY, rangeDens);
+    console.log(range/10, rangeDens);
 
-    const MarchTriCubesRe = new CubeTriCoords(w, h, l, rangeDens, rangeXY, noise);
+    const MarchTriCubesRe = new CubeTriCoords(w, h, l, rangeDens, range, noise);
 
     marchCubArr = [];
 

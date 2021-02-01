@@ -1,4 +1,3 @@
-const element = document.getElementById("lol");
 const viewPort = require('../functions/viewport');
 const { min, max, floor, abs, sqrt } = Math
 const { getPoints } = require('../functions/points');
@@ -7,7 +6,9 @@ const matrixes = require('../functions/matrix');
 const points = require('../functions/points');
 const viewPortGL = require("../functions/viewportGL");
 const CubeTriCoords = require("../functions/CubeTriCoords");
-const displayNum = 1;
+const perlinNoise = require("perlin-noise-3d");
+const noise = new perlinNoise(Math.random()*120482);
+const displayNum = 0;
 
 const cubeSides = [
     //SOUTH
@@ -30,7 +31,7 @@ const cubeSides = [
     [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5] ,    [0.5 , -0.5 , -0.5]  ]
 ]
 
-let marchCubArr = [];
+var marchCubArr = [];
 /*
 
     1 x 1 x 1
@@ -55,11 +56,11 @@ let marchCubArr = [];
 /*let vp = new viewPort(200, 200, 60, 90);
 let projMat = vp.projectionMatrix();*/
 
-const h = 7
-const w = 7
-const l = 7
+const h = 30
+const w = 30
+const l = 30
 
-const MarchTriCoords = new CubeTriCoords(w, h, l, 0);
+const MarchTriCoords = new CubeTriCoords(w, h, l, 0.4, 10, noise);
 
 const vpGL = new viewPortGL(730, 1490, 60, 90, "canv", 17);
 
@@ -122,3 +123,25 @@ if(displayNum == 0){
 
     }, 50);
 }
+
+function redraw(){
+    var rangeXY = document.getElementById("rangeMod").value;
+    var rangeDens = document.getElementById("densityMod").value/100;
+
+    console.log(rangeXY, rangeDens);
+
+    const MarchTriCubesRe = new CubeTriCoords(w, h, l, rangeDens, rangeXY, noise);
+
+    marchCubArr = [];
+
+    for(let i = 0; i<w-1; i++){
+        for(let j = 0; j<h-1; j++){
+            for(let u = 0; u<l-1; u++){
+                let point = MarchTriCubesRe.getTriArrs(i, j, u)
+                point.length > 0 ? marchCubArr.push(...point) : 0;
+            }
+        }
+    }
+    console.log(marchCubArr)
+}
+

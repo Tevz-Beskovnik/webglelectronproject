@@ -1,8 +1,9 @@
-const { tan, atan, sin, asin, cos, acos, PI } = Math
+const { tan, atan, sin, asin, cos, acos, PI, sqrt } = Math
 const process = require('process');
 const viewPort = require('./viewport');
 const glClear = require("gl-clear");
 const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('./matrix');
+const { NOMEM } = require('dns');
 
 function ctg(x) { return 1 / Math.tan(x); }
 function actg(x) { return Math.PI / 2 - Math.atan(x); }
@@ -191,7 +192,7 @@ class ViewPortGL {
         this.gl.enableVertexAttribArray(colorAttrLoc);
     }
 
-    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom) => {
+    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom, rgb0 = [1.0, 0.0, 0.0], rgb1 = [0.0, 1.0, 0.0], rgb2 = [0.0, 0.0, 1.0]) => {
 
         let Zml = 0.9;
         let ZoomOut = zoom;
@@ -226,24 +227,61 @@ class ViewPortGL {
             translated2[2] += ZoomOut;
             translated3[2] += ZoomOut;
 
-            points1 = customVecMultiply(projMat, translated1);
-            points2 = customVecMultiply(projMat, translated2);
-            points3 = customVecMultiply(projMat, translated3);
+            /*
+                Lighting
+            */
 
-            points1[2] = (points1[2] - Zml) * 10;
-            points2[2] = (points2[2] - Zml) * 10;
-            points3[2] = (points3[2] - Zml) * 10;
+            let line1 = [];
+            line1[0] = translated2[0] - translated1[0];
+            line1[1] = translated2[1] - translated1[1];
+            line1[2] = translated2[2] - translated1[2];
+            
+            let line2 = [];
+            line2[0] = translated3[0] - translated1[0];
+            line2[1] = translated3[1] - translated1[1];
+            line2[2] = translated3[2] - translated1[2];
 
+            let normal = [];
+            normal[0] = line1[1] * line2[2] - line1[2] * line2[1];
+            normal[1] = line1[2] * line2[0] - line1[0] * line2[2];
+            normal[2] = line1[0] * line2[1] - line1[1] * line2[0];
+
+            let l = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+            normal[0] /= l, normal[1] /= l, normal[2] /= l;
+
+            if(
+                normal[0] * translated1[0] +
+                normal[1] * translated1[1] +
+                normal[2] * translated1[2] < 0
+            ){
+                //illumination
+                let lightDir = [0, 0, -1]
+                let lh = sqrt(lightDir[0]*lightDir[0]+lightDir[1]*lightDir[1]+lightDir[2]*lightDir[2]);
+                lightDir[0] /= lh, lightDir[1] /= lh, lightDir[2] /= lh;
+
+                var dp = normal[0] * lightDir[0] + normal[1] * lightDir[1] + normal[2] * lightDir[2]
+
+                let col = [1*dp*0.9, 0*dp*0.9, 0*dp*0.9]
+
+                points1 = customVecMultiply(projMat, translated1);
+                points2 = customVecMultiply(projMat, translated2);
+                points3 = customVecMultiply(projMat, translated3);
+
+                points1[2] = (points1[2] - Zml) * 10;
+                points2[2] = (points2[2] - Zml) * 10;
+                points3[2] = (points3[2] - Zml) * 10;
+            
             /*
                 First three values are calculated points for the trinagles,
                 the second three points are the RGB values in decimal
                 for now its hardcoded will change later
             */
-            vertexPointsCols.push(
-                points1[0], points1[1], points1[2], 1.0, 0.0, 0.0,
-                points2[0], points2[1], points2[2], 0.0, 1.0, 0.0,
-                points3[0], points3[1], points3[2], 0.0, 0.0, 1.0
+                vertexPointsCols.push(
+                points1[0], points1[1], points1[2], ...col,
+                points2[0], points2[1], points2[2], ...col,
+                points3[0], points3[1], points3[2], ...col
             );
+            }
         });
 
         this.setTriangles(vertexPointsCols, 6);

@@ -8,8 +8,12 @@
   </head>
   <body>
     <canvas id="canv"></canvas>
-    <div class="kek">
-      <div id="lol" class="one"></div>
+    <div class="sliders">
+      <p>X and Y mod</p>
+      <input type="range" id="rangeMod" min="0" max="1000">
+      <p>Range</p>
+      <input type="range" id="densityMod" min="0" max="100">
+      <button id="Redraw" onclick="redraw();">Redraw</button>
     </div>
   </body>
 </html>

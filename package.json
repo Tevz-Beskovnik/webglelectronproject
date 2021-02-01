@@ -45,10 +45,14 @@
     }
   },
   "dependencies": {
+    "@chriscourses/perlin-noise": "^1.0.5",
+    "alea": "^1.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "fix-path": "^3.0.0",
     "gl-clear": "^2.0.0",
-    "perlin-noise-3d": "^0.5.4"
+    "perlin-noise": "0.0.1",
+    "perlin-noise-3d": "^0.5.4",
+    "simplex-noise": "^2.4.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",

@@ -18,19 +18,25 @@ e8|    |                 |   |
 
 const { generateFloorPlane } = require("./getActivePoints");
 const { edgeNums: getEdgeNums } = require("./edge");
+const { perlinN3D, getNoiseValue, simplexNoise } = require("./noiseFunction");
+
 const edge = require("./edge");
 
 class Cubes{
 
-    constructor(w, h, l, density){
+    constructor(w, h, l, density, mod, noise){
         this.w = w;
         this.h = h;
         this.l = l;
+
         this.wshift = w/2;
         this.hshift = h/2;
         this.lshift = l/2;
 
-        this.floorPlane = generateFloorPlane(w, h, l, density);
+        this.density = density;
+        this.mod = mod
+
+        this.noise = noise;
 
         this.v0;
         this.v1;
@@ -40,19 +46,31 @@ class Cubes{
         this.v5;
         this.v6;
         this.v7;
-
-        this.edgeCoords;
     }
 
     getCubeCoorsrds(x, y, z){
-        this.v0 = [x-this.wshift, y-this.hshift, z-this.lshift, this.floorPlane[x][y][z]];
-        this.v1 = [x+1-this.wshift, y-this.hshift, z-this.lshift, this.floorPlane[x+1][y][z]];
-        this.v2 = [x+1-this.wshift, y-this.hshift, z+1-this.lshift, this.floorPlane[x+1][y][z+1]];
-        this.v3 = [x-this.wshift, y-this.hshift, z+1-this.lshift, this.floorPlane[x][y][z+1]];
-        this.v4 = [x-this.wshift, y+1-this.hshift, z-this.lshift, this.floorPlane[x][y+1][z]];
-        this.v5 = [x+1-this.wshift, y+1-this.hshift, z-this.lshift, this.floorPlane[x+1][y+1][z]];
-        this.v6 = [x+1-this.wshift, y+1-this.hshift, z+1-this.lshift, this.floorPlane[x+1][y+1][z+1]];
-        this.v7 = [x-this.wshift, y+1-this.hshift, z+1-this.lshift, this.floorPlane[x][y+1][z+1]];
+
+        let xm = x;
+        let zm = z;
+        let ym = y;
+
+        let k0 = simplexNoise(xm, ym, zm, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k1 = simplexNoise(xm+1, ym, zm, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k2 = simplexNoise(xm+1, ym, zm+1, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k3 = simplexNoise(xm, ym, zm+1, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k4 = simplexNoise(xm, ym+1, zm, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k5 = simplexNoise(xm+1, ym+1, zm, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k6 = simplexNoise(xm+1, ym+1,zm+1, this.w, this.h, this.l, this.density, this.noise, this.mod);
+        let k7 = simplexNoise(xm, ym+1, zm+1, this.w, this.h, this.l, this.density, this.noise, this.mod);
+
+        this.v0 = [x-this.wshift, y-this.hshift, z-this.lshift, k0];
+        this.v1 = [x+1-this.wshift, y-this.hshift, z-this.lshift, k1];
+        this.v2 = [x+1-this.wshift, y-this.hshift, z+1-this.lshift, k2];
+        this.v3 = [x-this.wshift, y-this.hshift, z+1-this.lshift, k3];
+        this.v4 = [x-this.wshift, y+1-this.hshift, z-this.lshift, k4];
+        this.v5 = [x+1-this.wshift, y+1-this.hshift, z-this.lshift, k5];
+        this.v6 = [x+1-this.wshift, y+1-this.hshift, z+1-this.lshift, k6];
+        this.v7 = [x-this.wshift, y+1-this.hshift, z+1-this.lshift, k7];
 
         return [this.v7[3], this.v6[3], this.v5[3], this.v4[3], this.v3[3], this.v2[3], this.v1[3], this.v0[3]];
     }

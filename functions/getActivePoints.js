@@ -1,5 +1,8 @@
-const perlinNoise = require("perlin-noise-3d");
-const noise = new perlinNoise();
+const Alea = require("alea");
+var random = new Alea(1932858712884)
+
+const perlinNoise = require("simplex-noise");
+const noise = new perlinNoise(random);
 
 module.exports = {
  

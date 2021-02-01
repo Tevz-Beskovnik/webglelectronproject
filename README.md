@@ -10,7 +10,7 @@
 
 * **projectionMatrix** Returns the projection matrix,
 * **setTriangles** Takes in the array of coordinates and colors (like this: **[x1, y1, z1, r, g, b, x2, y2, z2, r, g, b, x3, y3, z3, r, g, b]**. Note that the rgb values go from 0.0 to 1.0), that in turn construct a triangle, the coordinates of which are bound to a buffer.
-* **vertex3DCalc** Takes in an array of **vertecies** that you can see in *getVal.js*, and an **x**, **y** and **z** rotation, with those values it calculates the object in 3D space and sets the so they can be directly drawn.
+* **vertex3DCalc** Takes in an array of **vertecies** that you can see in *getVal.js*, and an **x**, **y** and **z** rotation aswell as a **zoom parameter**, with those values it calculates the object in 3D space and sets the so they can be directly drawn, this function also **illuminates** the cube.
 * **draw** Takes in an array of numbers that define the rgba values of the background (array should look like this: **[r, g, b, a]**, ranging from 0 to 1), this functions draw the set triangles from the prior function to the screen.
 
 ### Demo
@@ -25,10 +25,9 @@
   The marching cubes alghorithm takes a number of points and the accoring to your surface level draws a terrain based on a triangulation table (this is a poor explenation, but it's the best i can do since im a amature)
   
 ### Cubes class
-*(This is an extreamly early version of this and im almost 100% certain that im not correctly sampeling the noise)*
 
-* **constructor** Takes in a width, height, length and density parameter.
+* **constructor** Takes in a width, height, length, density parameter, noise mod, and a noise function, these intern construct.
 * **getTriArrs** Takes in x, y, z, return an array of triangles.
 
-### Demo using the viewportGL to render
+### Demo using perlin nose and the viewportGL class to render
 ![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes.png)

@@ -20,14 +20,32 @@
 
 ## Marching cubes alghorithm
 
+### Dependencies
+
+* **perlin-noise-3d** you can find it [here](https://www.npmjs.com/package/perlin-noise-3d), or just download the depneencies.
+
 ### What is the marching cubes alghorith?
 
   The marching cubes alghorithm takes a number of points and the accoring to your surface level draws a terrain based on a triangulation table (this is a poor explenation, but it's the best i can do since im a amature)
   
 ### Cubes class
 
-* **constructor** Takes in a width, height, length, density parameter, noise mod, and a noise function, these intern construct.
+* **constructor** Takes in a width, height, length, options object containing density: isolevel *(from 1-0)*, xmod: x-offset, ymod: y-offset, zmod: z-offset, sampleRate: interval at what it should sample it *(higher values from noise to be less smooth and lover for it to be more smooth should be a vlaue between 1-0)*, noise: the noise function. Then it takes in colors that is an array filled with four arrays of 3 sets of values from 0-1, and lastly a bool that determens weather it should interpolate the surface or not *(that means if it sohould smooth it or keep it blocky)*  
+*Example:*  
+new CubeTriCoords(w, h, l, {  
+                                                                      density: rangeDens,  
+                                                                      xmod: rangex/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))),  
+                                                                      ymod: rangey/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))),  
+                                                                      zmod: rangez/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))),  
+                                                                      sampleRate: noiseSpace,  
+                                                                      noise: noise  
+                                                                   }, colors, true);
 * **getTriArrs** Takes in x, y, z, return an array of triangles.
 
 ### Demo using perlin nose and the viewportGL class to render
 ![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes1.png)
+
+### Demo using interpolation
+![](https://github.com/Tevzi2/webglelectronproject/blob/marching-cubes/demo-marching-cubes-interp.png)
+
+

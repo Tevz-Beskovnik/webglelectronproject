@@ -33,9 +33,8 @@ module.exports = {
     gets an array that is exectly 8 long and it contains 0s and 1s that are from 0-7 that
     will then be converted to the correct binarynumber corresponding to the correct possition in the edge table array
     */
-    "edgeNums": (activePoints) => {
-        if(activePoints.length != 8) return new Error("Your array isn't 8 elements long");
-        let arrNum = parseInt(activePoints.join(""), 2);
+    edgeNums: (activePoints) => {
+        const arrNum = parseInt(activePoints.join(""), 2);
         return triTable[arrNum];
     }
 }

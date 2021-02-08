@@ -1,9 +1,5 @@
-const { tan, atan, sin, asin, cos, acos, PI, sqrt } = Math
-const process = require('process');
-const viewPort = require('./viewport');
-const glClear = require("gl-clear");
+const { PI, sqrt } = Math
 const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('./matrix');
-const { NOMEM } = require('dns');
 
 function ctg(x) { return 1 / Math.tan(x); }
 function actg(x) { return Math.PI / 2 - Math.atan(x); }
@@ -192,7 +188,7 @@ class ViewPortGL {
         this.gl.enableVertexAttribArray(colorAttrLoc);
     }
 
-    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom, rgb0 = [1.0, 0.0, 0.0], rgb1 = [0.0, 1.0, 0.0], rgb2 = [0.0, 0.0, 1.0]) => {
+    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom) => {
 
         let Zml = 0.9;
         let ZoomOut = zoom;
@@ -256,12 +252,12 @@ class ViewPortGL {
             ){
                 //illumination
                 let lightDir = [0, 0, -1]
-                let lh = sqrt(lightDir[0]*lightDir[0]+lightDir[1]*lightDir[1]+lightDir[2]*lightDir[2]);
+                const lh = sqrt(lightDir[0]*lightDir[0]+lightDir[1]*lightDir[1]+lightDir[2]*lightDir[2]);
                 lightDir[0] /= lh, lightDir[1] /= lh, lightDir[2] /= lh;
 
-                var dp = normal[0] * lightDir[0] + normal[1] * lightDir[1] + normal[2] * lightDir[2]
+                var dp = normal[0] * lightDir[0] + normal[1] * lightDir[1] + normal[2] * lightDir[2];
 
-                let col = [1*dp*0.9, 0*dp*0.9, 0*dp*0.9]
+                let col = [tri[3][0]*dp, tri[3][1]*dp, tri[3][2]*dp];
 
                 points1 = customVecMultiply(projMat, translated1);
                 points2 = customVecMultiply(projMat, translated2);

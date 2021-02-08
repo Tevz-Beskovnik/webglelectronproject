@@ -5,14 +5,30 @@
     <title>marching cubes</title>
     <link rel="stylesheet" href="index.css">
     <script defer src="getVal.js"></script>
+    <style>
+      .inp{
+        width: 800px;
+      }
+      #densityMod{
+        width: 100%
+      }
+    </style>
   </head>
   <body>
     <canvas id="canv"></canvas>
     <div class="sliders">
-      <p id="range">X and Y mod: 0</p>
-      <button onclick="addRange();">Add</button><button onclick="removeRange();">Subtract</button>
-      <p>Range</p>
-      <input type="range" id="densityMod" min="0" max="100">
+      <p id="rangex">Noise range x: 0</p>
+      <button onclick="addRangex();">Add</button><button onclick="removeRangex();">Subtract</button>
+      <p id="rangey">Noise range y: 0</p>
+      <button onclick="addRangey();">Add</button><button onclick="removeRangey();">Subtract</button>
+      <p id="rangez">Noise range z: 0</p>
+      <button onclick="addRangez();">Add</button><button onclick="removeRangez();">Subtract</button>
+      <p id="rng">Range: 0.5</p>
+      <div class="inp">
+        <input onchange="change2(this.value, 'rng', 'Range: ');" type="range" id="densityMod" min="0" max="100">
+      </div>
+      <p id="rate">Adjust noise spacing: 0.005</p>
+      <input onchange="change(this.value, 'rate', 'Adjust noise spacing: ');" type="range" id="sampleRate" min="0" max="10">
       <p>re-draw the cube</p>
       <button id="Redraw" onclick="redraw();">Redraw</button>
     </div>

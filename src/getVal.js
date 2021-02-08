@@ -7,9 +7,29 @@ const points = require('../functions/points');
 const viewPortGL = require("../functions/viewportGL");
 const CubeTriCoords = require("../functions/CubeTriCoords");
 const perlinNoise = require("perlin-noise-3d");
-const noise = new perlinNoise(Math.random()*120482);
+const noise = new perlinNoise(4335235532);
 const displayNum = 1;
-var range = 0;
+const colors = [
+    [0.13, 0.54, 0.13],
+    [0.13, 0.54, 0.13],
+    [0.13, 0.54, 0.13],
+    [0.13, 0.54, 0.13]
+];
+/*[
+    [0.52, 0.80, 0.98],
+    [0.13, 0.54, 0.13],
+    [0.66, 0.66, 0.66],
+    [1, 1, 1],
+]*/
+
+
+var rangex = 0;
+var rangey = 0;
+var rangez = 0;
+
+var noiseSpace = 0.001;
+
+var rangeDens = 0.4;
 
 const Alea = require("alea");
 var random = new Alea(11204481988);
@@ -66,7 +86,14 @@ const h = 30
 const w = 30
 const l = 30
 
-const MarchTriCoords = new CubeTriCoords(w, h, l, 0.4, 0, noise);
+const MarchTriCoords = new CubeTriCoords(w, h, l, {
+    density: 0.4, 
+    xmod: 0, 
+    ymod: 0, 
+    zmod: 0, 
+    sampleRate: 0.01,
+    noise: noise
+}, colors, true);
 
 const vpGL = new viewPortGL(730, 1490, 60, 90, "canv", 17);
 
@@ -108,6 +135,27 @@ document.addEventListener('keydown', (e) => {
     if(e.key == "o"){
         zoom-=0.1;
     }
+    if(e.key == "ArrowLeft"){
+        removeRangex();
+    }
+    if(e.key == "ArrowRight"){
+        addRangex();
+    }
+    if(e.key == "ArrowDown"){
+        removeRangey();
+    }
+    if(e.key == "ArrowUp"){
+        addRangey();
+    }
+    if(e.key == "m"){
+        removeRangez();
+    }
+    if(e.key == "n"){
+        addRangez();
+    }
+    if(e.key == "r"){
+        redraw();
+    }
 });
 
 if(displayNum == 0){
@@ -130,30 +178,80 @@ if(displayNum == 0){
     }, 50);
 }
 
-
-
-function addRange(){
-    let div = document.getElementById("range")
-
-    range+=1;
-
-    div.innerHTML = "X and Y mod: " + range;
+function change(value, id, text){
+    document.getElementById(id).innerHTML = text + value/1000;
+    noiseSpace = value/1000;
 }
 
-function removeRange(){
-    let div = document.getElementById("range")
+function change2(value, id, text){
+    document.getElementById(id).innerHTML = text + value/100;
+    rangeDens = value/100;
+}
 
-    range-=1;
+function addRangex(){
+    let div = document.getElementById("rangex")
 
-    div.innerHTML = "X and Y mod: " + range;
+    rangex+=1;
+
+    div.innerHTML = "Noise range x: " + rangex;
+    redraw();
+}
+
+function removeRangex(){
+    let div = document.getElementById("rangex")
+
+    rangex-=1;
+
+    div.innerHTML = "Noise range x: " + rangex;
+    redraw();
+}
+
+function addRangey(){
+    let div = document.getElementById("rangey")
+
+    rangey+=1;
+
+    div.innerHTML = "Noise range y: " + rangey;
+    redraw();
+}
+
+function removeRangey(){
+    let div = document.getElementById("rangey")
+
+    rangey-=1;
+
+    div.innerHTML = "Noise range y: " + rangey;
+    redraw();
+}
+
+function addRangez(){
+    let div = document.getElementById("rangez")
+
+    rangez+=1;
+
+    div.innerHTML = "Noise range z: " + rangez;
+    redraw();
+}
+
+function removeRangez(){
+    let div = document.getElementById("rangez")
+
+    rangez-=1;
+
+    div.innerHTML = "Noise range z: " + rangez;
+    redraw();
 }
 
 function redraw(){
-    var rangeDens = document.getElementById("densityMod").value/100;
 
-    console.log(range/10, rangeDens);
-
-    const MarchTriCubesRe = new CubeTriCoords(w, h, l, rangeDens, range, noise);
+    const MarchTriCubesRe = new CubeTriCoords(w, h, l, {
+        density: rangeDens, 
+        xmod: rangex/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))),
+        ymod: rangey/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))),
+        zmod: rangez/(Math.pow(10, Math.abs(Math.log10(noiseSpace)+1))), 
+        sampleRate: noiseSpace,
+        noise: noise
+    }, colors, true);
 
     marchCubArr = [];
 
@@ -165,6 +263,7 @@ function redraw(){
             }
         }
     }
-    console.log(marchCubArr)
+
+    console.log(marchCubArr);
 }
 

@@ -31,30 +31,25 @@ var noiseSpace = 0.001;
 
 var rangeDens = 0.4;
 
-const Alea = require("alea");
-var random = new Alea(11204481988);
-const simplexNoise = require("simplex-noise");
-const simplex = new simplexNoise(random);
-
 const cubeSides = [
     //SOUTH
-    [ [-0.5 , -0.5 , -0.5] ,    [-0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , -0.5]  ],
-    [ [-0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , -0.5] ,    [0.5 , -0.5 , -0.5]  ],
+    [ [-0.5 , -0.5 , -0.5] ,    [-0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , -0.5], [0.13, 0.54, 0.13]  ],
+    [ [-0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , -0.5] ,    [0.5 , -0.5 , -0.5], [0.13, 0.54, 0.13]  ],
    // EAST 
-    [ [0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , 0.5]  ],
-    [ [0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , 0.5] ,    [0.5 , -0.5 , 0.5]  ],
+    [ [0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , 0.5], [0.13, 0.54, 0.13] ],
+    [ [0.5 , -0.5 , -0.5] ,    [0.5 , 0.5 , 0.5] ,    [0.5 , -0.5 , 0.5],[0.13, 0.54, 0.13] ],
    // NORTH
-    [ [0.5 , -0.5 , 0.5] ,    [0.5 , 0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5]  ],
-    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5] ,    [-0.5 , -0.5 , 0.5]  ],
+    [ [0.5 , -0.5 , 0.5] ,    [0.5 , 0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5], [0.13, 0.54, 0.13] ],
+    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5] ,    [-0.5 , -0.5 , 0.5], [0.13, 0.54, 0.13] ],
    // WEST
-    [ [-0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5] ,    [-0.5 , 0.5 , -0.5]  ],
-    [ [-0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , -0.5] ,    [-0.5 , -0.5 , -0.5]  ],
+    [ [-0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , 0.5] ,    [-0.5 , 0.5 , -0.5], [0.13, 0.54, 0.13]  ],
+    [ [-0.5 , -0.5 , 0.5] ,    [-0.5 , 0.5 , -0.5] ,    [-0.5 , -0.5 , -0.5], [0.13, 0.54, 0.13]  ],
    // TOP
-    [ [-0.5 , 0.5 , -0.5] ,    [-0.5 , 0.5 , 0.5] ,    [0.5 , 0.5 , 0.5]  ],
-    [ [-0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , 0.5] ,    [0.5 , 0.5 , -0.5]  ],
+    [ [-0.5 , 0.5 , -0.5] ,    [-0.5 , 0.5 , 0.5] ,    [0.5 , 0.5 , 0.5], [0.13, 0.54, 0.13]  ],
+    [ [-0.5 , 0.5 , -0.5] ,    [0.5 , 0.5 , 0.5] ,    [0.5 , 0.5 , -0.5], [0.13, 0.54, 0.13]  ],
    // BOTTOM
-    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5]  ],
-    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5] ,    [0.5 , -0.5 , -0.5]  ]
+    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5], [0.13, 0.54, 0.13]  ],
+    [ [0.5 , -0.5 , 0.5] ,    [-0.5 , -0.5 , -0.5] ,    [0.5 , -0.5 , -0.5], [0.13, 0.54, 0.13]  ]
 ]
 
 var marchCubArr = [];
@@ -87,7 +82,7 @@ const w = 30
 const l = 30
 
 const MarchTriCoords = new CubeTriCoords(w, h, l, {
-    density: 0.4, 
+    density: 0.5, 
     xmod: 0, 
     ymod: 0, 
     zmod: 0, 
@@ -97,10 +92,12 @@ const MarchTriCoords = new CubeTriCoords(w, h, l, {
 
 const vpGL = new viewPortGL(730, 1490, 60, 90, "canv", 17);
 
-let rotZM = 0.0;
-let rotXM = 0.0;
-let rotYM = 0.0;
-let zoom = 17.0;
+let opts = {
+    x: 0,
+    y: 0,
+    yaw: 0,
+    forward: 0
+}
 
 for(let i = 0; i<w-1; i++){
     for(let j = 0; j<h-1; j++){
@@ -117,50 +114,57 @@ document.addEventListener('keydown', (e) => {
     e = e || window.event;
 
     if(e.key == "a"){
-        rotYM -= 0.1;
+        opts.x = -0.01;
     }else if(e.key == "d"){
-        rotYM += 0.1;
+        opts.x = +0.01;
     }
-
     if(e.key == "w"){
-        rotXM -= 0.1;
+        opts.y = +0.01;
     }else if(e.key == "s"){
-        rotXM += 0.1;
+        opts.y = -0.01;
+    }
+    if(e.key == "ArrowLeft"){
+        opts.yaw = +0.01;
+    }
+    if(e.key == "ArrowRight"){
+        opts.yaw = -0.01;
+    }
+    if(e.key == "ArrowDown"){
+        opts.forward = -0.01;
+    }
+    if(e.key == "ArrowUp"){
+        opts.forward = +0.01;
     }
 
     if(e.key == "z"){
-        zoom+=0.1;
+        zoom -= 0.1;
     }
-
     if(e.key == "o"){
-        zoom-=0.1;
-    }
-    if(e.key == "ArrowLeft"){
-        removeRangex();
-    }
-    if(e.key == "ArrowRight"){
-        addRangex();
-    }
-    if(e.key == "ArrowDown"){
-        removeRangey();
-    }
-    if(e.key == "ArrowUp"){
-        addRangey();
-    }
-    if(e.key == "m"){
-        removeRangez();
-    }
-    if(e.key == "n"){
-        addRangez();
+        zoom += 0.1;
     }
     if(e.key == "r"){
         redraw();
     }
 });
 
+document.addEventListener("keyup", (e) => {
+    if(e.key == "ArrowUp" || e.key == "ArrowDown"){
+        opts.forward = 0;
+    }
+    if(e.key == "ArrowLeft" || e.key == "ArrowRight"){
+        opts.yaw = 0;
+    }
+    if(e.key == "w" || e.key == "s"){
+        opts.y = 0;
+    }
+    if(e.key == "a" || e.key == "d"){
+        opts.x = 0;
+    }
+})
+
 if(displayNum == 0){
     setInterval(()=> {
-        vpGL.vertex3DCalc(cubeSides, rotXM, rotYM, rotZM, zoom);
+        vpGL.vertex3DCalc(cubeSides, opts);
 
         vpGL.draw([
             0.75, 0.85, 0.8, 1.0
@@ -169,7 +173,7 @@ if(displayNum == 0){
     }, 50);
 }else{
     setInterval(()=> {
-        vpGL.vertex3DCalc(marchCubArr, rotXM, rotYM, rotZM, zoom);
+        vpGL.vertex3DCalc(marchCubArr, opts);
 
         vpGL.draw([
             0.75, 0.85, 0.8, 1.0

@@ -2,19 +2,22 @@ const { floor, abs } = Math
 
 module.exports = {
     multiplyMatrixAndPoint: (matrix, point) => {
-        const c0r0 = matrix[0], c1r0 = matrix[1], c2r0 = matrix[2];
-        const c0r1 = matrix[3], c1r1 = matrix[4], c2r1 = matrix[5];
-        const c0r2 = matrix[6], c1r2 = matrix[7], c2r2 = matrix[8];
+        const c0r0 = matrix[0], c1r0 = matrix[1], c2r0 = matrix[2], c3r0 = matrix[3];
+        const c0r1 = matrix[4], c1r1 = matrix[5], c2r1 = matrix[6], c3r1 = matrix[7];
+        const c0r2 = matrix[8], c1r2 = matrix[9], c2r2 = matrix[10], c3r2 = matrix[11];
+        const c0r3 = matrix[12], c1r3 = matrix[13], c2r3 = matrix[14], c3r3 = matrix[15];
     
         const x = point[0];
         const y = point[1];
         const z = point[2];
+        const w = point[3];
     
-        const resultX = (x*c0r0) + (y*c0r1) + (z*c0r2);
-        const resultY = (x*c1r0) + (y*c1r1) + (z*c1r2);
-        const resultZ = (x*c2r0) + (y*c2r1) + (z*c2r2);
+        const resultX = (x*c0r0) + (y*c0r1) + (z*c0r2) + (w * c0r3);
+        const resultY = (x*c1r0) + (y*c1r1) + (z*c1r2) + (w * c1r3);
+        const resultZ = (x*c2r0) + (y*c2r1) + (z*c2r2) + (w * c2r3);
+        const resultW = (x*c3r0) + (y*c3r1) + (z*c3r2) + (w * c3r3);
     
-        return [resultX, resultY, resultZ]
+        return [resultX, resultY, resultZ, resultW];
     },
 
     customVecMultiply: (matrix, point) => {
@@ -76,20 +79,41 @@ module.exports = {
         return [resultX, resultY, resultZ, resultW];
     },
 
-    multiplyMatrices: (matrixA, matrixB) => {
-        const row0 = [matrixB[0], matrixB[1], matrixB[2]];
-        const row1 = [matrixB[3], matrixB[4], matrixB[5]];
-        const row2 = [matrixB[6], matrixB[7], matrixB[8]];
-    
-        const res0 = multiplyMatrixAndPoint(matrixA, row0);
-        const res1 = multiplyMatrixAndPoint(matrixA, row1);
-        const res2 = multiplyMatrixAndPoint(matrixA, row2);
-    
+    Matrix_MultiplyVector(matrix, point){
+        const c0r0 = matrix[ 0], c1r0 = matrix[ 1], c2r0 = matrix[ 2], c3r0 = matrix[ 3];
+        const c0r1 = matrix[ 4], c1r1 = matrix[ 5], c2r1 = matrix[ 6], c3r1 = matrix[ 7];
+        const c0r2 = matrix[ 8], c1r2 = matrix[ 9], c2r2 = matrix[10], c3r2 = matrix[11];
+        const c0r3 = matrix[12], c1r3 = matrix[13], c2r3 = matrix[14], c3r3 = matrix[15];
+
+        const x = point[0] * c0r0 + point[1] * c1r0 + point[2] * c2r0 + point[3] * c3r0;
+        const y = point[0] * c0r1 + point[1] * c1r1 + point[2] * c2r1 + point[3] * c3r1;
+        const z = point[0] * c0r2 + point[1] * c1r2 + point[2] * c2r2 + point[3] * c3r2;
+        const w = point[0] * c0r3 + point[1] * c1r3 + point[2] * c2r3 + point[3] * c3r3;
+
+        return [x, y, z, w];
+    },
+
+    matrixTranslation(x, y, z){
         return [
-            res0[0], res0[1], res0[2],
-            res1[0], res1[1], res1[2],
-            res2[0], res2[1], res2[2]
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            x, y, z, 1
         ];
+    },
+
+    multiplyMatrices: (m1, m2) => {
+        let matrix = [
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        ];
+		for (let c = 0; c < 4; c++)
+			for (let r = 0; r < 4; r++)
+				matrix[r*4+c] = m1[r*4+0] * m2[0*4+c] + m1[r*4+1] * m2[1*4+c] + m1[r*4+2] * m2[2*4+c] + m1[r*4+3] * m2[3*4+c];
+
+		return matrix;
     },
 
     MatrixZRotation: (a) => {
@@ -99,6 +123,33 @@ module.exports = {
             0, 0, 1, 0,
             0, 0, 0, 1
         ]
+    },
+
+    MatrixIdentity: () => {
+        return [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ];
+    },
+
+    MatrixQuickInverse: (m) => {
+        let matrix = [
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        ];
+        matrix[0] = m[0]; matrix[1] = m[4]; matrix[2] = m[8]; matrix[3] = 0;
+        matrix[4] = m[1]; matrix[5] = m[5]; matrix[6] = m[9]; matrix[7] = 0;
+        matrix[8] = m[2]; matrix[9] = m[6]; matrix[10] = m[10]; matrix[11] = 0;
+        matrix[12] = -(m[12] * matrix[0] + m[13] * matrix[4] + m[14] * matrix[8]);
+        matrix[13] = -(m[12] * matrix[1] + m[13] * matrix[5] + m[14] * matrix[9]);
+        matrix[14] = -(m[12] * matrix[2] + m[13] * matrix[6] + m[14] * matrix[10]);
+        matrix[15] = 1;
+
+        return matrix;
     },
 
     MatrixXRotation: (a) => {

@@ -1,5 +1,6 @@
 const { PI, sqrt } = Math
-const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('./matrix');
+const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, matrixTranslation, MatrixYRotation, MatrixZRotation, customVecMultiply, MatrixIdentity, Matrix_MultiplyVector, MatrixQuickInverse } = require('./matrix');
+const { vecAdd, vecCrossPru, vecDiv, vecDotPru, vecLen, vecMul, vecNorm, vecSub, matrixPointAt, Triangle_ClipAgainstPlane, recursiveMatProj } = require("./vectorCalculations");
 
 function ctg(x) { return 1 / Math.tan(x); }
 function actg(x) { return Math.PI / 2 - Math.atan(x); }
@@ -25,13 +26,25 @@ class ViewPortGL {
 
        this.fNear = 0.1;
 
-       this.fFar = 100;
+       this.fFar = 1000;
 
        this.fov = fov;
 
        this.fovRad = ctg(fov * 0.5 / 180 * PI);
 
        this.ascpectRation = this.h / this.w;
+
+        /*
+            Camera variables (that must not be reset)
+        */
+
+        this.vLookDir = [0, 0, 1, 1];
+
+        this.vLookDirSqued = [1, 0, 0, 1];
+
+        this.vCamera = [0, 0, 0, 1];
+
+        this.fYaw = 0;
         
         /*
             WebGL declaration
@@ -188,97 +201,115 @@ class ViewPortGL {
         this.gl.enableVertexAttribArray(colorAttrLoc);
     }
 
-    vertex3DCalc = (vertecies, rotXN, rotYN, rotZN, zoom) => {
+    vertex3DCalc = (vertecies, opts) => {
 
-        let Zml = 0.9;
-        let ZoomOut = zoom;
+        const projMat = this.projectionMatrix();
 
         let vertexPointsCols = [];
 
-        let rotZ = MatrixZRotation(rotZN);
-        let rotX = MatrixXRotation(rotXN);
-        let rotY = MatrixYRotation(rotYN);
+        let trisToRaster = [];
 
-        let projMat = this.projectionMatrix();
+        let vUp = [0, 1, 0, 1];
+
+        let vTarget = [0, 0, 1, 1];
+
+        let vTarget2 = [1, 0, 0, 1];
+
+        //this.vCamera[0] += 10*opts.x;
+        this.vCamera[1] += 20*opts.forward;
+
+        this.fYaw += 8*opts.yaw;
+
+        const vForward = vecMul(this.vLookDir, 30*opts.y);
+
+        const vSideways = vecMul(this.vLookDirSqued, 30*opts.x);
+
+        this.vCamera = vecAdd(this.vCamera, vForward);
+
+        this.vCamera = vecAdd(this.vCamera, vSideways);
+
+        const rotZ = MatrixZRotation(0 * 0.5);
+        const mCameraRot = MatrixYRotation(this.fYaw);
+        const mCamreaRotSqued = MatrixYRotation(this.fYaw);
+		const rotX = MatrixXRotation(0);
+
+        const mTrans = matrixTranslation(0.0, 0.0, 5.0);
+
+        let mWorld = MatrixIdentity();
+        mWorld = multiplyMatrices(rotZ, rotX);
+        mWorld = multiplyMatrices(mWorld, mTrans);
+
+        //ustvari "kaži proti" matriko za kamero
+        
+        this.vLookDir = customVecMultiply(mCameraRot, vTarget);
+        this.vLookDirSqued = customVecMultiply(mCamreaRotSqued, vTarget2);
+        vTarget = vecAdd(this.vCamera, this.vLookDir);
+        vTarget2 = vecAdd(this.vCamera, this.vLookDirSqued);
+
+        const mCamera = matrixPointAt(this.vCamera, vTarget, vUp);
+
+        const mView = MatrixQuickInverse(mCamera);
 
         vertecies.forEach(tri => {
 
-            let m1 = customVecMultiply(rotX, tri[0]);
-            let m2 = customVecMultiply(rotX, tri[1]);
-            let m3 = customVecMultiply(rotX, tri[2]);
-
-            let points1 = customVecMultiply(rotZ, m1);
-            let points2 = customVecMultiply(rotZ, m2);
-            let points3 = customVecMultiply(rotZ, m3);
-
-            points1 = customVecMultiply(rotY, points1);
-            points2 = customVecMultiply(rotY, points2);
-            points3 = customVecMultiply(rotY, points3);
-
-            let translated1 = points1;
-            let translated2 = points2;
-            let translated3 = points3;
-
-            translated1[2] += ZoomOut;
-            translated2[2] += ZoomOut;
-            translated3[2] += ZoomOut;
+            let translated1 = customVecMultiply(mWorld, tri[0]);
+            let translated2 = customVecMultiply(mWorld, tri[1]); // <--- moje točke se pomnožijo z matriko, ki predstavlja svet.
+            let translated3 = customVecMultiply(mWorld, tri[2]);
 
             /*
                 Lighting
             */
 
-            let line1 = [];
-            line1[0] = translated2[0] - translated1[0];
-            line1[1] = translated2[1] - translated1[1];
-            line1[2] = translated2[2] - translated1[2];
-            
-            let line2 = [];
-            line2[0] = translated3[0] - translated1[0];
-            line2[1] = translated3[1] - translated1[1];
-            line2[2] = translated3[2] - translated1[2];
+            //naredim linije iz tranzlacij za točke.
 
-            let normal = [];
-            normal[0] = line1[1] * line2[2] - line1[2] * line2[1];
-            normal[1] = line1[2] * line2[0] - line1[0] * line2[2];
-            normal[2] = line1[0] * line2[1] - line1[1] * line2[0];
+            const line1 = vecSub(translated2, translated1);
+            const line2 = vecSub(translated3, translated1); 
 
-            let l = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
-            normal[0] /= l, normal[1] /= l, normal[2] /= l;
+            const normal = vecNorm(vecCrossPru(line1, line2)); // <-- križni produkt normaliziram (nimam pojma kaj je normalizacija)
 
-            if(
-                normal[0] * translated1[0] +
-                normal[1] * translated1[1] +
-                normal[2] * translated1[2] < 0
-            ){
+            const vCameraRay = vecSub(translated1, this.vCamera); // <--- žarek kamere
+
+            if(vecDotPru(normal, vCameraRay) < 0){
                 //illumination
-                let lightDir = [0, 0, -1]
-                const lh = sqrt(lightDir[0]*lightDir[0]+lightDir[1]*lightDir[1]+lightDir[2]*lightDir[2]);
-                lightDir[0] /= lh, lightDir[1] /= lh, lightDir[2] /= lh;
+                let lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
 
-                var dp = normal[0] * lightDir[0] + normal[1] * lightDir[1] + normal[2] * lightDir[2];
+                let dp = Math.max(0.1, vecDotPru(lightDir, normal));
 
                 let col = [tri[3][0]*dp, tri[3][1]*dp, tri[3][2]*dp];
 
-                points1 = customVecMultiply(projMat, translated1);
-                points2 = customVecMultiply(projMat, translated2);
-                points3 = customVecMultiply(projMat, translated3);
+                let triViewed1 = customVecMultiply(mView, translated1);
+                let triViewed2 = customVecMultiply(mView, translated2);
+                let triViewed3 = customVecMultiply(mView, translated3);
+
+                /*let points1 = customVecMultiply(projMat, triViewed1); //triViewed1
+                let points2 = customVecMultiply(projMat, triViewed2); //triViewed2    <--- old vars
+                let points3 = customVecMultiply(projMat, triViewed3); //triViewed3
 
                 points1[2] = (points1[2] - Zml) * 10;
                 points2[2] = (points2[2] - Zml) * 10;
                 points3[2] = (points3[2] - Zml) * 10;
-            
-            /*
-                First three values are calculated points for the trinagles,
-                the second three points are the RGB values in decimal
-                for now its hardcoded will change later
-            */
+
                 vertexPointsCols.push(
-                points1[0], points1[1], points1[2], ...col,
-                points2[0], points2[1], points2[2], ...col,
-                points3[0], points3[1], points3[2], ...col
-            );
+                    points1[0], points1[1], points1[2], ...col,
+                    points2[0], points2[1], points2[2], ...col, // <--- nastavim vertexe in barve za en trikotnik,
+                    points3[0], points3[1], points3[2], ...col  //      torej tri točke in tri barve za vsak kot trikotnika.
+                );/**/
+
+                let clippedTris = Triangle_ClipAgainstPlane([0, 0, 0.1, 1], [0, 0, 1, 1], [triViewed1, triViewed2, triViewed3]); 
+                let nClippedTris = clippedTris.length-1;
+
+                vertexPointsCols.push(
+                    ...recursiveMatProj(clippedTris, nClippedTris, [], col, projMat)
+                );
             }
         });
+
+        /*trisToRaster.sort(function(t1, t2){
+            const z1 = (t1[0][2] + t1[1][2] + t1[2][2]) / 3;
+            const z2 = (t2[0][2] + t2[1][2] + t2[2][2]) / 3;
+
+            return z1 > z2;
+        });*/
 
         this.setTriangles(vertexPointsCols, 6);
     }

@@ -252,9 +252,9 @@ class ViewPortGL {
 
         vertecies.forEach(tri => {
 
-            let translated1 = customVecMultiply(mWorld, tri[0]);
-            let translated2 = customVecMultiply(mWorld, tri[1]); // <--- moje točke se pomnožijo z matriko, ki predstavlja svet.
-            let translated3 = customVecMultiply(mWorld, tri[2]);
+            const translated1 = customVecMultiply(mWorld, tri[0]);
+            const translated2 = customVecMultiply(mWorld, tri[1]); // <--- moje točke se pomnožijo z matriko, ki predstavlja svet.
+            const translated3 = customVecMultiply(mWorld, tri[2]);
 
             /*
                 Lighting
@@ -271,29 +271,15 @@ class ViewPortGL {
 
             if(vecDotPru(normal, vCameraRay) < 0){
                 //illumination
-                let lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
+                const lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
 
-                let dp = Math.max(0.1, vecDotPru(lightDir, normal));
+                const dp = Math.max(0.1, vecDotPru(lightDir, normal));
 
-                let col = [tri[3][0]*dp, tri[3][1]*dp, tri[3][2]*dp];
+                const col = [tri[3][0]*dp, tri[3][1]*dp, tri[3][2]*dp];
 
-                let triViewed1 = customVecMultiply(mView, translated1);
-                let triViewed2 = customVecMultiply(mView, translated2);
-                let triViewed3 = customVecMultiply(mView, translated3);
-
-                /*let points1 = customVecMultiply(projMat, triViewed1); //triViewed1
-                let points2 = customVecMultiply(projMat, triViewed2); //triViewed2    <--- old vars
-                let points3 = customVecMultiply(projMat, triViewed3); //triViewed3
-
-                points1[2] = (points1[2] - Zml) * 10;
-                points2[2] = (points2[2] - Zml) * 10;
-                points3[2] = (points3[2] - Zml) * 10;
-
-                vertexPointsCols.push(
-                    points1[0], points1[1], points1[2], ...col,
-                    points2[0], points2[1], points2[2], ...col, // <--- nastavim vertexe in barve za en trikotnik,
-                    points3[0], points3[1], points3[2], ...col  //      torej tri točke in tri barve za vsak kot trikotnika.
-                );/**/
+                const triViewed1 = customVecMultiply(mView, translated1);
+                const triViewed2 = customVecMultiply(mView, translated2);
+                const triViewed3 = customVecMultiply(mView, translated3);
 
                 let clippedTris = Triangle_ClipAgainstPlane([0, 0, 0.1, 1], [0, 0, 1, 1], [triViewed1, triViewed2, triViewed3]); 
                 let nClippedTris = clippedTris.length-1;
@@ -303,13 +289,6 @@ class ViewPortGL {
                 );
             }
         });
-
-        /*trisToRaster.sort(function(t1, t2){
-            const z1 = (t1[0][2] + t1[1][2] + t1[2][2]) / 3;
-            const z2 = (t2[0][2] + t2[1][2] + t2[2][2]) / 3;
-
-            return z1 > z2;
-        });*/
 
         this.setTriangles(vertexPointsCols, 6);
     }

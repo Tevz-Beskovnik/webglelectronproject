@@ -38,11 +38,11 @@ class ViewPortGL {
             Camera variables (that must not be reset)
         */
 
-        this.vLookDir = [0, 0, 1, 1];
+        this.vLookDir = [0, 0, 1];
 
-        this.vLookDirSqued = [1, 0, 0, 1];
+        this.vLookDirSqued = [1, 0, 0];
 
-        this.vCamera = [0, 0, 0, 1];
+        this.vCamera = [0, 0, 0];
 
         this.fYaw = 0;
         
@@ -58,7 +58,7 @@ class ViewPortGL {
         this.canvas.width = this.w;
         this.canvas.height = this.h;
 
-        this.gl = this.canvas.getContext('webgl', {preserveDrawingBuffer: false});
+        this.gl = this.canvas.getContext('webgl', {preserveDrawingBuffer: false, antialias : false});
 
         if(!this.gl) this.gl = this.canvas.getContext('experimental-webgl', {preserveDrawingBuffer: false});
         if(!this.gl) alert("Your browser does not support webGL.");
@@ -77,6 +77,82 @@ class ViewPortGL {
 
             attribute vec3 vertColor;
             attribute vec3 vertPosition;
+            attribute vec3 vertNormal;
+            attribute vec3 vertCamera;
+            attribute vec3 vertTarget;
+
+            varying vec3 fragColor;
+
+            uniform mat4 mProj;
+
+            mat4 inverse(mat4 mat)
+            {
+                mat4 returnMat;
+                returnMat[0][0] = mat[0][0];
+                returnMat[0][1] = mat[1][0];
+                returnMat[0][2] = mat[2][0];
+                returnMat[0][3] = 0.0;
+                returnMat[1][0] = mat[0][1];
+                returnMat[1][1] = mat[1][1];
+                returnMat[1][2] = mat[2][1];
+                returnMat[1][3] = 0.0;
+                returnMat[2][0] = mat[0][2];
+                returnMat[2][1] = mat[1][2];
+                returnMat[2][2] = mat[2][2];
+                returnMat[2][3] = 0.0;
+                returnMat[3][0] = -(mat[3][0] * returnMat[0][0] + mat[3][1] * returnMat[1][0] + mat[3][2] * returnMat[2][0]);
+                returnMat[3][1] = -(mat[3][0] * returnMat[0][1] + mat[3][1] * returnMat[1][1] + mat[3][2] * returnMat[2][1]);
+                returnMat[3][2] = -(mat[3][0] * returnMat[0][2] + mat[3][1] * returnMat[1][2] + mat[3][2] * returnMat[2][2]);
+                returnMat[3][3] = 1.0;
+                return returnMat;
+            }
+
+            void main()
+            {
+                vec3 newPos = vec3(vertPosition);
+                //translation matrix
+                mat4 mTrans = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 5.0, 1.0);
+                //z rotation matrix
+                mat4 rotZ = mat4(cos(0.0), -sin(0.0), 0.0, 0.0, sin(0.0), cos(0.0), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+                //x rotation matrix
+                mat4 rotX = mat4(1.0, 0.0, 0.0, 0.0, 0.0, cos(0.0), -sin(0.0), 0.0, 0.0, sin(0.0), cos(0.0), 0.0, 0.0, 0.0, 0.0, 1.0);
+                //world matrix
+                mat4 mWorld = (rotZ * rotX) * mTrans;
+            
+                //calculate mView
+                vec3 newFor = normalize(vertCamera - vertTarget);
+                vec3 a = newFor * dot(vec3(0, 1, 0), newFor);
+                vec3 newUp = normalize(vec3(0, 1, 0) - a);
+                vec3 newRight = cross(newUp, newFor);
+
+                //create mCamera
+                mat4 mCamera = mat4(
+                    newRight.x, newRight.y, newRight.z, 0,
+                    newUp.x, newUp.y, newUp.z, 0,
+                    newFor.x, newFor.y, newFor.z, 0,
+                    vertCamera.x, vertCamera.y, vertCamera.z, 0
+                );
+                
+                //create mView
+                mat4 mView = inverse(mCamera);
+                
+                //light direction
+                vec3 lightDir = normalize(vec3(0, 1, -1));
+                
+                //calculate dp
+                float dp = max(0.1, dot(lightDir, vertNormal));
+                
+                //translated postion vector
+                vec4 vTrans = vec4(vertPosition, 1.0) * mWorld;
+                
+                fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
+                gl_Position = mProj * (mView * (vec4(vertPosition, 1.0) * mWorld));
+            }
+        `/*`
+            precision highp float;
+
+            attribute vec3 vertColor;
+            attribute vec3 vertPosition;
             varying vec3 fragColor;
 
             void main()
@@ -84,7 +160,7 @@ class ViewPortGL {
                 fragColor = vertColor;
                 gl_Position = vec4(vertPosition, 1.0);
             }
-        `;
+        `;/**/
 
         this.fragShaderStr = `
             precision mediump float;
@@ -153,20 +229,28 @@ class ViewPortGL {
             console.error("ERROR validating the program caused and error", this.gl.getProgramInfoLog(this.program));
             return;
         }
+
+        this.uniforms = {
+            mProjMat: this.gl.getUniformLocation(this.program, `mProj`)
+        }
+
+
     }
 
     projectionMatrix = () => {
-        return [
-            this.ascpectRation * this.fovRad, 0, 0, 0,
-            0, this.fovRad, 0, 0,
-            0, 0, this.fFar / (this.fFar - this.fNear), 1,
-            0, 0, (-this.fFar * this.fNear) / (this.fFar - this.fNear), 0
+        const mat =  [
+            this.ascpectRation * this.fovRad, 0.0, 0.0, 0.0,
+            0.0, this.fovRad, 0.0, 0.0,
+            0.0, 0.0, this.fFar / (this.fFar - this.fNear), 1.0,
+            0.0, 0.0, (-this.fFar * this.fNear) / (this.fFar - this.fNear), 0.0
         ]
+
+        this.gl.uniformMatrix4fv(this.uniforms.mProjMat, false, mat);
     }
 
     setTriangles = (coordsAndColors) => {
 
-        this.numOfPoints = coordsAndColors.length/6;
+        this.numOfPoints = coordsAndColors.length/15;
 
         this.gl.deleteBuffer(this.TriangleVerBufObj);
 
@@ -178,6 +262,12 @@ class ViewPortGL {
         var positionAttrLoc = this.gl.getAttribLocation(this.program, 'vertPosition');
         
         var colorAttrLoc = this.gl.getAttribLocation(this.program, 'vertColor');
+
+        var normalAttrLoc = this.gl.getAttribLocation(this.program, 'vertNormal');
+
+        var cameraAttrLoc = this.gl.getAttribLocation(this.program, 'vertCamera');
+
+        var targetAttrLoc = this.gl.getAttribLocation(this.program, 'vertTarget');
 
         this.gl.vertexAttribPointer(
             positionAttrLoc, //atribute Location
@@ -197,13 +287,38 @@ class ViewPortGL {
             3 * Float32Array.BYTES_PER_ELEMENT// offset from the coordinates in bits to the color values so 3 skips :)
         );
 
+        this.gl.vertexAttribPointer(
+            normalAttrLoc,
+            3,
+            this.gl.FLOAT,
+            this.gl.FALSE,
+            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            6 * Float32Array.BYTES_PER_ELEMENT
+        )
+
+        this.gl.vertexAttribPointer(
+            cameraAttrLoc,
+            3,
+            this.gl.FLOAT,
+            this.gl.FALSE,
+            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            9 * Float32Array.BYTES_PER_ELEMENT
+        )
+
+        this.gl.vertexAttribPointer(
+            targetAttrLoc,
+            3,
+            this.gl.FLOAT,
+            this.gl.FALSE,
+            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            12 * Float32Array.BYTES_PER_ELEMENT
+        )
+
         this.gl.enableVertexAttribArray(positionAttrLoc);
         this.gl.enableVertexAttribArray(colorAttrLoc);
     }
 
     vertex3DCalc = (vertecies, opts) => {
-
-        const projMat = this.projectionMatrix();
 
         let vertexPointsCols = [];
 
@@ -246,9 +361,9 @@ class ViewPortGL {
         vTarget = vecAdd(this.vCamera, this.vLookDir);
         vTarget2 = vecAdd(this.vCamera, this.vLookDirSqued);
 
-        const mCamera = matrixPointAt(this.vCamera, vTarget, vUp);
+        /*const mCamera = matrixPointAt(this.vCamera, vTarget, vUp);
 
-        const mView = MatrixQuickInverse(mCamera);
+        const mView = MatrixQuickInverse(mCamera);*/
 
         vertecies.forEach(tri => {
 
@@ -267,9 +382,10 @@ class ViewPortGL {
 
             const normal = vecNorm(vecCrossPru(line1, line2)); // <-- križni produkt normaliziram (nimam pojma kaj je normalizacija)
 
-            const vCameraRay = vecSub(translated1, this.vCamera); // <--- žarek kamere
+            const vCameraRay = vecSub(translated1, this.vCamera); // <--- žarek kamere*/
 
             if(vecDotPru(normal, vCameraRay) < 0){
+                //#region 
                 //illumination
                 const lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
 
@@ -286,8 +402,20 @@ class ViewPortGL {
 
                 vertexPointsCols.push(
                     ...recursiveMatProj(clippedTris, nClippedTris, [], col, projMat)
+                );*/
+                //#endregion
+                
+                normal.pop();
+                vTarget.pop();
+
+                vertexPointsCols.push(
+                    ...tri[0], ...col, ...normal, ...this.vCamera, vTarget.pop(),
+                    ...tri[1], ...col, ...normal, ...this.vCamera, vTarget.pop(),
+                    ...tri[2], ...col, ...normal, ...this.vCamera, vTarget.pop()
                 );
             }
+
+            
         });
 
         this.setTriangles(vertexPointsCols, 6);
@@ -302,6 +430,9 @@ class ViewPortGL {
         );
         
         this.gl.useProgram(this.program);
+
+        this.projectionMatrix();
+
         this.gl.drawArrays(this.gl.TRIANGLES, 0, this.numOfPoints);
     }
 }

@@ -14,9 +14,9 @@ module.exports = {
 
         const density = (Math.abs(noise.get((x+xmod)*sampleRate, (y+ymod)*sampleRate, (z+zmod)*sampleRate)));
         
-        if(((y == 0 || x == 0 || z == 0) || (y == h-1 || x == w-1 || z == l-1))){
+        /*if(((y == 0 || x == 0 || z == 0) || (y == h-1 || x == w-1 || z == l-1))){
             return [0, densityNum, densityNum];
-        }
+        }*/
         if(density > densityNum){
             return [1, density, densityNum];
         }

@@ -77,9 +77,9 @@ var marchCubArr = [];
 /*let vp = new viewPort(200, 200, 60, 90);
 let projMat = vp.projectionMatrix();*/
 
-const h = 30
-const w = 30
-const l = 30
+const h = 100
+const w = 100
+const l = 100
 
 const MarchTriCoords = new CubeTriCoords(w, h, l, {
     density: 0.5, 

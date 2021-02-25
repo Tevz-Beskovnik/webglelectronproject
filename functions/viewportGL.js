@@ -85,18 +85,6 @@ class ViewPortGL {
             
         uniform mat4 mProj;
             
-        float vecLen(vec3 v){
-            return sqrt(dot(v, v));
-        }
-        
-        vec3 vecNorm(vec3 v){
-            float l = vecLen(v);
-            if(l != 0.0){
-                return vec3(v.x / l, v.y / l, v.z / l);
-            }
-            return vec3(v.x, v.y, v.z);
-        }
-        
         mat4 inverse(mat4 mat)
         {
             mat4 returnMat;
@@ -121,7 +109,6 @@ class ViewPortGL {
         
         void main()
         {
-            vec3 newPos = vec3(vertPosition);
             //translation matrix
             mat4 mTrans = mat4(1.0, 0.0, 0.0, 0.0,
                                0.0, 1.0, 0.0, 0.0,
@@ -141,9 +128,9 @@ class ViewPortGL {
             mat4 mWorld = (rotZ * rotX) * mTrans;
             
             //calculate mView
-            vec3 newFor = vecNorm(vertTarget - vertCamera);
+            vec3 newFor = normalize(vertTarget - vertCamera);
             vec3 a = newFor * dot(vec3(0, 1, 0), newFor);
-            vec3 newUp = vecNorm(vec3(0, 1, 0) - a);
+            vec3 newUp = normalize(vec3(0, 1, 0) - a);
             vec3 newRight = cross(newUp, newFor);
             
             //create mCamera
@@ -158,13 +145,10 @@ class ViewPortGL {
             mat4 mView = inverse(mCamera);
             
             //light direction
-            vec3 lightDir = vecNorm(vec3(0, 1, -1));
+            vec3 lightDir = normalize(vec3(0, 1, -1));
             
             //calculate dp
             float dp = max(0.1, dot(lightDir, vertNormal));
-            
-            //translated postion vector
-            vec4 vTrans = vec4(vertPosition, 1.0) * mWorld;
             
             fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
             gl_Position = vec4(mProj * mView * mWorld * vec4(vertPosition, 1.0));
@@ -337,6 +321,9 @@ class ViewPortGL {
 
         this.gl.enableVertexAttribArray(positionAttrLoc);
         this.gl.enableVertexAttribArray(colorAttrLoc);
+        this.gl.enableVertexAttribArray(normalAttrLoc);
+        this.gl.enableVertexAttribArray(cameraAttrLoc);
+        this.gl.enableVertexAttribArray(targetAttrLoc);
     }
 
     vertex3DCalc = (vertecies, opts) => {
@@ -425,14 +412,22 @@ class ViewPortGL {
                     ...recursiveMatProj(clippedTris, nClippedTris, [], col, projMat)
                 );*/
                 //#endregion
-                
-                normal.pop();
-                vTarget.pop();
+
+                let vecCam = Array(3);
+                vecCam[0] = Math.round(this.vCamera[0] * 10)/10;
+                vecCam[1] = Math.round(this.vCamera[1] * 10)/10;
+                vecCam[2] = Math.round(this.vCamera[2] * 10)/10;
+
+                vTarget[0] = Math.round(vTarget[0] * 10)/10;
+                vTarget[1] = Math.round(vTarget[1] * 10)/10;
+                vTarget[2] = Math.round(vTarget[2] * 10)/10;
+
+                console.log(tri[0], col, normal, vecCam, vTarget);
 
                 vertexPointsCols.push(
-                    ...tri[0], ...col, ...normal, ...this.vCamera, ...vTarget,
-                    ...tri[1], ...col, ...normal, ...this.vCamera, ...vTarget,
-                    ...tri[2], ...col, ...normal, ...this.vCamera, ...vTarget
+                    ...tri[0], ...col, ...normal, ...vecCam, ...vTarget,
+                    ...tri[1], ...col, ...normal, ...vecCam, ...vTarget,
+                    ...tri[2], ...col, ...normal, ...vecCam, ...vTarget
                 );
             }
 

@@ -2,16 +2,16 @@ const { customVecMultiply } = require("./matrix");
 
 module.exports = {
     vecAdd(v1, v2){
-        return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2], 1];
+        return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
     },
     vecSub(v1, v2){
-        return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2], 1];
+        return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
     },
     vecMul(v1, k){
-        return [v1[0] * k, v1[1] * k, v1[2] * k, 1];
+        return [v1[0] * k, v1[1] * k, v1[2] * k];
     },
     vecDiv(v1, k){
-        return [v1[0] / k, v1[1] / k, v1[2] / k, 1];
+        return [v1[0] / k, v1[1] / k, v1[2] / k];
     },
     vecDotPru(v1, v2){
         return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]; 
@@ -21,14 +21,13 @@ module.exports = {
     },
     vecNorm(v){
         const l = module.exports.vecLen(v);
-        return l != 0 ? [ v[0] / l, v[1] / l, v[2] / l, 1] : [ v[0], v[1], v[2], 1];
+        return l != 0 ? [ v[0] / l, v[1] / l, v[2] / l] : [ v[0], v[1], v[2]];
     },
     vecCrossPru(v1, v2){
         return [
             v1[1] * v2[2] - v1[2] * v2[1],
             v1[2] * v2[0] - v1[0] * v2[2],
-            v1[0] * v2[1] - v1[1] * v2[0],
-			1
+            v1[0] * v2[1] - v1[1] * v2[0]
         ];
     },
 

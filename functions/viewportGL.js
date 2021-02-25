@@ -153,19 +153,7 @@ class ViewPortGL {
             fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
             gl_Position = vec4(mProj * mView * mWorld * vec4(vertPosition, 1.0));
         }
-        `/*`
-            precision highp float;
-
-            attribute vec3 vertColor;
-            attribute vec3 vertPosition;
-            varying vec3 fragColor;
-
-            void main()
-            {
-                fragColor = vertColor;
-                gl_Position = vec4(vertPosition, 1.0);
-            }
-        `;/**/
+        `
 
         this.fragShaderStr = `
             precision mediump float;
@@ -279,7 +267,7 @@ class ViewPortGL {
             3, //size of vector
             this.gl.FLOAT, //type of element stored in array
             this.gl.FALSE,
-            6 * Float32Array.BYTES_PER_ELEMENT, // size of individual vertex
+            15 * Float32Array.BYTES_PER_ELEMENT, // size of individual vertex
             0 //no offset fuck you :middle_finger:
         );
 
@@ -288,7 +276,7 @@ class ViewPortGL {
             3,
             this.gl.FLOAT,
             this.gl.FALSE,
-            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            15 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
             3 * Float32Array.BYTES_PER_ELEMENT// offset from the coordinates in bits to the color values so 3 skips :)
         );
 
@@ -297,7 +285,7 @@ class ViewPortGL {
             3,
             this.gl.FLOAT,
             this.gl.FALSE,
-            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            15 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
             6 * Float32Array.BYTES_PER_ELEMENT
         )
 
@@ -306,7 +294,7 @@ class ViewPortGL {
             3,
             this.gl.FLOAT,
             this.gl.FALSE,
-            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            15 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
             9 * Float32Array.BYTES_PER_ELEMENT
         )
 
@@ -315,7 +303,7 @@ class ViewPortGL {
             3,
             this.gl.FLOAT,
             this.gl.FALSE,
-            6 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
+            15 * Float32Array.BYTES_PER_ELEMENT, //size of one vertex
             12 * Float32Array.BYTES_PER_ELEMENT
         )
 
@@ -369,10 +357,6 @@ class ViewPortGL {
         vTarget = vecAdd(this.vCamera, this.vLookDir);
         vTarget2 = vecAdd(this.vCamera, this.vLookDirSqued);
 
-        /*const mCamera = matrixPointAt(this.vCamera, vTarget, vUp);
-
-        const mView = MatrixQuickInverse(mCamera);*/
-
         vertecies.forEach(tri => {
 
             const translated1 = customVecMultiply(mWorld, tri[0]);
@@ -393,41 +377,13 @@ class ViewPortGL {
             const vCameraRay = vecSub(translated1, this.vCamera); // <--- žarek kamere*/
 
             if(vecDotPru(normal, vCameraRay) < 0){
-                //illumination
-                //const lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
-
-                //const dp = Math.max(0.1, vecDotPru(lightDir, normal));
 
                 const col = [tri[3][0], tri[3][1], tri[3][2]];
 
-                //#region 
-                /*const triViewed1 = customVecMultiply(mView, translated1);
-                const triViewed2 = customVecMultiply(mView, translated2);
-                const triViewed3 = customVecMultiply(mView, translated3);
-
-                let clippedTris = Triangle_ClipAgainstPlane([0, 0, 0.1, 1], [0, 0, 1, 1], [triViewed1, triViewed2, triViewed3]); 
-                let nClippedTris = clippedTris.length-1;
-
                 vertexPointsCols.push(
-                    ...recursiveMatProj(clippedTris, nClippedTris, [], col, projMat)
-                );*/
-                //#endregion
-
-                let vecCam = Array(3);
-                vecCam[0] = Math.round(this.vCamera[0] * 10)/10;
-                vecCam[1] = Math.round(this.vCamera[1] * 10)/10;
-                vecCam[2] = Math.round(this.vCamera[2] * 10)/10;
-
-                vTarget[0] = Math.round(vTarget[0] * 10)/10;
-                vTarget[1] = Math.round(vTarget[1] * 10)/10;
-                vTarget[2] = Math.round(vTarget[2] * 10)/10;
-
-                console.log(tri[0], col, normal, vecCam, vTarget);
-
-                vertexPointsCols.push(
-                    ...tri[0], ...col, ...normal, ...vecCam, ...vTarget,
-                    ...tri[1], ...col, ...normal, ...vecCam, ...vTarget,
-                    ...tri[2], ...col, ...normal, ...vecCam, ...vTarget
+                    ...tri[0], ...col, ...normal, ...this.vCamera, ...vTarget,
+                    ...tri[1], ...col, ...normal, ...this.vCamera, ...vTarget,
+                    ...tri[2], ...col, ...normal, ...this.vCamera, ...vTarget
                 );
             }
 

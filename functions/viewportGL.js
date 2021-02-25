@@ -73,81 +73,102 @@ class ViewPortGL {
         */
 
         this.vertexShaderStr = `
-            precision highp float;
+        precision highp float;
 
-            attribute vec3 vertColor;
-            attribute vec3 vertPosition;
-            attribute vec3 vertNormal;
-            attribute vec3 vertCamera;
-            attribute vec3 vertTarget;
-
-            varying vec3 fragColor;
-
-            uniform mat4 mProj;
-
-            mat4 inverse(mat4 mat)
-            {
-                mat4 returnMat;
-                returnMat[0][0] = mat[0][0];
-                returnMat[0][1] = mat[1][0];
-                returnMat[0][2] = mat[2][0];
-                returnMat[0][3] = 0.0;
-                returnMat[1][0] = mat[0][1];
-                returnMat[1][1] = mat[1][1];
-                returnMat[1][2] = mat[2][1];
-                returnMat[1][3] = 0.0;
-                returnMat[2][0] = mat[0][2];
-                returnMat[2][1] = mat[1][2];
-                returnMat[2][2] = mat[2][2];
-                returnMat[2][3] = 0.0;
-                returnMat[3][0] = -(mat[3][0] * returnMat[0][0] + mat[3][1] * returnMat[1][0] + mat[3][2] * returnMat[2][0]);
-                returnMat[3][1] = -(mat[3][0] * returnMat[0][1] + mat[3][1] * returnMat[1][1] + mat[3][2] * returnMat[2][1]);
-                returnMat[3][2] = -(mat[3][0] * returnMat[0][2] + mat[3][1] * returnMat[1][2] + mat[3][2] * returnMat[2][2]);
-                returnMat[3][3] = 1.0;
-                return returnMat;
-            }
-
-            void main()
-            {
-                vec3 newPos = vec3(vertPosition);
-                //translation matrix
-                mat4 mTrans = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 5.0, 1.0);
-                //z rotation matrix
-                mat4 rotZ = mat4(cos(0.0), -sin(0.0), 0.0, 0.0, sin(0.0), cos(0.0), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-                //x rotation matrix
-                mat4 rotX = mat4(1.0, 0.0, 0.0, 0.0, 0.0, cos(0.0), -sin(0.0), 0.0, 0.0, sin(0.0), cos(0.0), 0.0, 0.0, 0.0, 0.0, 1.0);
-                //world matrix
-                mat4 mWorld = (rotZ * rotX) * mTrans;
+        attribute vec3 vertColor;
+        attribute vec3 vertPosition;
+        attribute vec3 vertNormal;
+        attribute vec3 vertCamera;
+        attribute vec3 vertTarget;
             
-                //calculate mView
-                vec3 newFor = normalize(vertCamera - vertTarget);
-                vec3 a = newFor * dot(vec3(0, 1, 0), newFor);
-                vec3 newUp = normalize(vec3(0, 1, 0) - a);
-                vec3 newRight = cross(newUp, newFor);
-
-                //create mCamera
-                mat4 mCamera = mat4(
-                    newRight.x, newRight.y, newRight.z, 0,
-                    newUp.x, newUp.y, newUp.z, 0,
-                    newFor.x, newFor.y, newFor.z, 0,
-                    vertCamera.x, vertCamera.y, vertCamera.z, 0
-                );
-                
-                //create mView
-                mat4 mView = inverse(mCamera);
-                
-                //light direction
-                vec3 lightDir = normalize(vec3(0, 1, -1));
-                
-                //calculate dp
-                float dp = max(0.1, dot(lightDir, vertNormal));
-                
-                //translated postion vector
-                vec4 vTrans = vec4(vertPosition, 1.0) * mWorld;
-                
-                fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
-                gl_Position = mProj * (mView * (vec4(vertPosition, 1.0) * mWorld));
+        varying vec3 fragColor;
+            
+        uniform mat4 mProj;
+            
+        float vecLen(vec3 v){
+            return sqrt(dot(v, v));
+        }
+        
+        vec3 vecNorm(vec3 v){
+            float l = vecLen(v);
+            if(l != 0.0){
+                return vec3(v.x / l, v.y / l, v.z / l);
             }
+            return vec3(v.x, v.y, v.z);
+        }
+        
+        mat4 inverse(mat4 mat)
+        {
+            mat4 returnMat;
+            returnMat[0][0] = mat[0][0];
+            returnMat[0][1] = mat[1][0];
+            returnMat[0][2] = mat[2][0];
+            returnMat[0][3] = 0.0;
+        	returnMat[1][0] = mat[0][1];
+            returnMat[1][1] = mat[1][1];
+            returnMat[1][2] = mat[2][1];
+            returnMat[1][3] = 0.0;
+        	returnMat[2][0] = mat[0][2];
+            returnMat[2][1] = mat[1][2];
+            returnMat[2][2] = mat[2][2];
+            returnMat[2][3] = 0.0;
+        	returnMat[3][0] = -(mat[3][0] * returnMat[0][0] + mat[3][1] * returnMat[1][0] + mat[3][2] * returnMat[2][0]);
+        	returnMat[3][1] = -(mat[3][0] * returnMat[0][1] + mat[3][1] * returnMat[1][1] + mat[3][2] * returnMat[2][1]);
+        	returnMat[3][2] = -(mat[3][0] * returnMat[0][2] + mat[3][1] * returnMat[1][2] + mat[3][2] * returnMat[2][2]);
+        	returnMat[3][3] = 1.0;
+            return returnMat;
+        }
+        
+        void main()
+        {
+            vec3 newPos = vec3(vertPosition);
+            //translation matrix
+            mat4 mTrans = mat4(1.0, 0.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0, 0.0,
+                               0.0, 0.0, 1.0, 0.0,
+                               0.0, 0.0, 5.0, 1.0);
+            //z rotation matrix
+            mat4 rotZ = mat4(cos(0.0), -sin(0.0), 0.0,
+                             0.0, sin(0.0), cos(0.0), 
+                             0.0, 0.0, 0.0, 0.0, 1.0,
+                             0.0, 0.0, 0.0, 0.0, 1.0);
+            //x rotation matrix
+            mat4 rotX = mat4(1.0, 0.0, 0.0, 0.0,
+                             0.0, cos(0.0), -sin(0.0), 0.0, 
+                             0.0, sin(0.0), cos(0.0), 0.0, 
+                             0.0, 0.0, 0.0, 1.0);
+            //world matrix
+            mat4 mWorld = (rotZ * rotX) * mTrans;
+            
+            //calculate mView
+            vec3 newFor = vecNorm(vertTarget - vertCamera);
+            vec3 a = newFor * dot(vec3(0, 1, 0), newFor);
+            vec3 newUp = vecNorm(vec3(0, 1, 0) - a);
+            vec3 newRight = cross(newUp, newFor);
+            
+            //create mCamera
+            mat4 mCamera = mat4(
+                newRight.x, newRight.y, newRight.z, 0,
+                newUp.x, newUp.y, newUp.z, 0,
+                newFor.x, newFor.y, newFor.z, 0,
+                vertCamera.x, vertCamera.y, vertCamera.z, 0
+            );
+            
+            //create mView
+            mat4 mView = inverse(mCamera);
+            
+            //light direction
+            vec3 lightDir = vecNorm(vec3(0, 1, -1));
+            
+            //calculate dp
+            float dp = max(0.1, dot(lightDir, vertNormal));
+            
+            //translated postion vector
+            vec4 vTrans = vec4(vertPosition, 1.0) * mWorld;
+            
+            fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
+            gl_Position = vec4(mProj * mView * mWorld * vec4(vertPosition, 1.0));
+        }
         `/*`
             precision highp float;
 
@@ -385,15 +406,15 @@ class ViewPortGL {
             const vCameraRay = vecSub(translated1, this.vCamera); // <--- žarek kamere*/
 
             if(vecDotPru(normal, vCameraRay) < 0){
-                //#region 
                 //illumination
-                const lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
+                //const lightDir = vecNorm([0, 1, -1]) // <--- direkcija svetlobe
 
-                const dp = Math.max(0.1, vecDotPru(lightDir, normal));
+                //const dp = Math.max(0.1, vecDotPru(lightDir, normal));
 
-                const col = [tri[3][0]*dp, tri[3][1]*dp, tri[3][2]*dp];
+                const col = [tri[3][0], tri[3][1], tri[3][2]];
 
-                const triViewed1 = customVecMultiply(mView, translated1);
+                //#region 
+                /*const triViewed1 = customVecMultiply(mView, translated1);
                 const triViewed2 = customVecMultiply(mView, translated2);
                 const triViewed3 = customVecMultiply(mView, translated3);
 
@@ -409,9 +430,9 @@ class ViewPortGL {
                 vTarget.pop();
 
                 vertexPointsCols.push(
-                    ...tri[0], ...col, ...normal, ...this.vCamera, vTarget.pop(),
-                    ...tri[1], ...col, ...normal, ...this.vCamera, vTarget.pop(),
-                    ...tri[2], ...col, ...normal, ...this.vCamera, vTarget.pop()
+                    ...tri[0], ...col, ...normal, ...this.vCamera, ...vTarget,
+                    ...tri[1], ...col, ...normal, ...this.vCamera, ...vTarget,
+                    ...tri[2], ...col, ...normal, ...this.vCamera, ...vTarget
                 );
             }
 

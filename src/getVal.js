@@ -8,7 +8,7 @@ const viewPortGL = require("../functions/viewportGL");
 const CubeTriCoords = require("../functions/CubeTriCoords");
 const perlinNoise = require("perlin-noise-3d");
 const noise = new perlinNoise(4335235532);
-const displayNum = 1;
+const displayNum = 0;
 const colors = [
     [0.13, 0.54, 0.13],
     [0.13, 0.54, 0.13],

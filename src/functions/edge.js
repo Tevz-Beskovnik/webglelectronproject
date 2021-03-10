@@ -26,15 +26,12 @@ e8|    |                 |   |
   v0         e0          v1
 */
 
-const triTable = require("./triTable").triTable();
-
-module.exports = {
+const triTab = triTable();
     /*
     gets an array that is exectly 8 long and it contains 0s and 1s that are from 0-7 that
     will then be converted to the correct binarynumber corresponding to the correct possition in the edge table array
     */
-    edgeNums: (activePoints) => {
-        const arrNum = parseInt(activePoints.join(""), 2);
-        return triTable[arrNum];
-    }
+function edgeNums(activePoints) {
+    const arrNum = parseInt(activePoints.join(""), 2);
+    return triTab[arrNum];
 }

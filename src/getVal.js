@@ -1,13 +1,4 @@
-const viewPort = require('../functions/viewport');
-const { min, max, floor, abs, sqrt } = Math
-const { getPoints } = require('../functions/points');
-const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, MatrixYRotation, MatrixZRotation, customVecMultiply } = require('../functions/matrix');
-const matrixes = require('../functions/matrix');
-const points = require('../functions/points');
-const viewPortGL = require("../functions/viewportGL");
-const CubeTriCoords = require("../functions/CubeTriCoords");
-const perlinNoise = require("perlin-noise-3d");
-const noise = new perlinNoise(4335235532);
+const noise = new perlinNoise3d(4335235532);
 const displayNum = 1;
 const colors = [
     [0.13, 0.54, 0.13],
@@ -77,9 +68,9 @@ var marchCubArr = [];
 /*let vp = new viewPort(200, 200, 60, 90);
 let projMat = vp.projectionMatrix();*/
 
-const h = 40
-const w = 40
-const l = 40
+const h = 30
+const w = 30
+const l = 30
 
 const MarchTriCoords = new CubeTriCoords(w, h, l, {
     density: 0.5, 

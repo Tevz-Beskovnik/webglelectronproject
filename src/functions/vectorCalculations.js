@@ -1,49 +1,46 @@
-const { customVecMultiply } = require("./matrix");
-
-module.exports = {
-    vecAdd(v1, v2){
+    function vecAdd(v1, v2){
         return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
-    },
-    vecSub(v1, v2){
+    }
+    function vecSub(v1, v2){
         return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
-    },
-    vecMul(v1, k){
+    }
+    function vecMul(v1, k){
         return [v1[0] * k, v1[1] * k, v1[2] * k];
-    },
-    vecDiv(v1, k){
+    }
+    function vecDiv(v1, k){
         return [v1[0] / k, v1[1] / k, v1[2] / k];
-    },
-    vecDotPru(v1, v2){
+    }
+    function vecDotPru(v1, v2){
         return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]; 
-    },
-    vecLen(v){
-        return Math.sqrt(module.exports.vecDotPru(v, v));
-    },
-    vecNorm(v){
-        const l = module.exports.vecLen(v);
+    }
+    function vecLen(v){
+        return Math.sqrt(vecDotPru(v, v));
+    }
+    function vecNorm(v){
+        const l = vecLen(v);
         return l != 0 ? [ v[0] / l, v[1] / l, v[2] / l] : [ v[0], v[1], v[2]];
-    },
-    vecCrossPru(v1, v2){
+    }
+    function vecCrossPru(v1, v2){
         return [
             v1[1] * v2[2] - v1[2] * v2[1],
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0]
         ];
-    },
+    }
 
 	//pointaj proti temu, kamera gleda v to smer
-    matrixPointAt(pos, target, up){
+    function matrixPointAt(pos, target, up){
 
 		//izračunaj novo smer v katero gleda naprej
-        let newForward = module.exports.vecSub(target, pos);
-        newForward = module.exports.vecNorm(newForward);
+        let newForward = vecSub(target, pos);
+        newForward = vecNorm(newForward);
 
 		//izračunaj novo gor smer
-        const a = module.exports.vecMul(newForward, module.exports.vecDotPru(up, newForward));
-        let newUp = module.exports.vecSub(up, a);
-        newUp = module.exports.vecNorm(newUp);
+        const a = vecMul(newForward, vecDotPru(up, newForward));
+        let newUp = vecSub(up, a);
+        newUp = vecNorm(newUp);
 
-        const newRight = module.exports.vecCrossPru(newUp, newForward);
+        const newRight = vecCrossPru(newUp, newForward);
 
         return mat = [
             newRight[0], newRight[1], newRight[2], 0,
@@ -51,29 +48,30 @@ module.exports = {
             newForward[0], newForward[1], newForward[2], 0,
             pos[0], pos[1], pos[2], 0
         ];
-    },
-    Vector_IntersectPlane(plane_p, plane_n, lineStart, lineEnd){
-		plane_n = module.exports.vecNorm(plane_n);
-		const plane_d = -module.exports.vecDotPru(plane_n, plane_p);
-		const ad = module.exports.vecDotPru(lineStart, plane_n);
-		const bd = module.exports.vecDotPru(lineEnd, plane_n);
+    }
+
+    function Vector_IntersectPlane(plane_p, plane_n, lineStart, lineEnd){
+		plane_n = vecNorm(plane_n);
+		const plane_d = -vecDotPru(plane_n, plane_p);
+		const ad = vecDotPru(lineStart, plane_n);
+		const bd = vecDotPru(lineEnd, plane_n);
 		const t = (-plane_d - ad) / (bd - ad);
-		const lineStartToEnd = module.exports.vecSub(lineEnd, lineStart);
-		const lineToIntersect = module.exports.vecMul(lineStartToEnd, t);
-		return module.exports.vecAdd(lineStart, lineToIntersect);
-	},
-    Triangle_ClipAgainstPlane(plane_p, plane_n, in_tri){
+		const lineStartToEnd = vecSub(lineEnd, lineStart);
+		const lineToIntersect = vecMul(lineStartToEnd, t);
+		return vecAdd(lineStart, lineToIntersect);
+	}
+    function Triangle_ClipAgainstPlane(plane_p, plane_n, in_tri){
         
         var out_tri1 = Array(3), out_tri2 = Array(3);
 
 		// Make sure plane normal is indeed normal
-		plane_n = module.exports.vecNorm(plane_n);
+		plane_n = vecNorm(plane_n);
 
 		// Return signed shortest distance from point to plane, plane normal must be normalised
 		/*auto dist = [&](vec3d &p)*/
         function dist(p){
-			let n = module.exports.vecNorm(p);
-			return plane_n[0] * n[0] + plane_n[1] * n[1] + plane_n[2] * n[2] - module.exports.vecDotPru(plane_n, plane_p);
+			let n = vecNorm(p);
+			return plane_n[0] * n[0] + plane_n[1] * n[1] + plane_n[2] * n[2] - vecDotPru(plane_n, plane_p);
 		};
 
 		// Create two temporary storage arrays to classify points either side of plane
@@ -126,8 +124,8 @@ module.exports = {
 
 			// but the two new points are at the locations where the 
 			// original sides of the triangle (lines) intersect with the plane
-			out_tri1[1] = module.exports.Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0]);
-			out_tri1[2] = module.exports.Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[1]);
+			out_tri1[1] = Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0]);
+			out_tri1[2] = Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[1]);
 
 			return [out_tri1]; // Return the newly formed single triangle
 		}
@@ -145,19 +143,20 @@ module.exports = {
 			// intersects with the plane
 			out_tri1[0] = inside_points[0];
 			out_tri1[1] = inside_points[1];
-			out_tri1[2] = module.exports.Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0]);
+			out_tri1[2] = Vector_IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0]);
 
 			// The second triangle is composed of one of he inside points, a
 			// new point determined by the intersection of the other side of the 
 			// triangle and the plane, and the newly created point above
 			out_tri2[0] = inside_points[1];
 			out_tri2[1] = out_tri1[2];
-			out_tri2[2] = module.exports.Vector_IntersectPlane(plane_p, plane_n, inside_points[1], outside_points[0]);
+			out_tri2[2] = Vector_IntersectPlane(plane_p, plane_n, inside_points[1], outside_points[0]);
 
             return [out_tri1, out_tri2];
 		}
-	},
-	recursiveMatProj(arr, n, output, col, projMat){
+	}
+
+	function recursiveMatProj(arr, n, output, col, projMat){
 		if(n == -1){
 			return output;
 		}
@@ -178,7 +177,6 @@ module.exports = {
 			...points3, ...col
 		)
 
-		return module.exports.recursiveMatProj(arr, n-1, output2, col, projMat);
+		return recursiveMatProj(arr, n-1, output2, col, projMat);
 
 	}
-}

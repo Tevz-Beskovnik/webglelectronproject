@@ -5,14 +5,13 @@ attribute vec3 vertPosition;
 attribute vec3 vertNormal;
 attribute vec3 vertCamera;
 attribute vec3 vertTarget;
-
+    
 varying vec3 fragColor;
-
+    
 uniform mat4 mProj;
-
+    
 mat4 inverse(mat4 mat)
 {
-
     mat4 returnMat;
     returnMat[0][0] = mat[0][0];
     returnMat[0][1] = mat[1][0];
@@ -52,7 +51,7 @@ void main()
                      0.0, 0.0, 0.0, 1.0);
     //world matrix
     mat4 mWorld = (rotZ * rotX) * mTrans;
-
+    
     //calculate mView
     vec3 newFor = normalize(vertTarget - vertCamera);
     vec3 a = newFor * dot(vec3(0, 1, 0), newFor);
@@ -66,16 +65,16 @@ void main()
         newFor.x, newFor.y, newFor.z, 0,
         vertCamera.x, vertCamera.y, vertCamera.z, 0
     );
-
+    
     //create mView
     mat4 mView = inverse(mCamera);
-
+    
     //light direction
     vec3 lightDir = normalize(vec3(0, 1, -1));
-
+    
     //calculate dp
     float dp = max(0.1, dot(lightDir, vertNormal));
-
+    
     fragColor = vec3(vertColor.x * dp, vertColor.y * dp, vertColor.z * dp);
     gl_Position = vec4(mProj * mView * mWorld * vec4(vertPosition, 1.0));
 }

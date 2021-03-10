@@ -15,10 +15,7 @@ e8|    |                 |   |
   |/_____________________|/
   v0         e0          v1
 */
-const { edgeNums: getEdgeNums } = require("./edge");
-const { perlinN3D, getNoiseValue, simplexNoise } = require("./noiseFunction");
-const edge = require("./edge");
-const { abs, sqrt, pow, log10, round } = Math;
+const { abs } = Math;
 
 function colorSelector(y, h, colors){
     if(y >= h/4*3){
@@ -46,7 +43,7 @@ function interpolate(y2, y1){
     ];
 }
 
-class Cubes{
+class CubeTriCoords{
 
     constructor(w, h, l, opts, colors, interp){
         this.w = w;
@@ -102,7 +99,7 @@ class Cubes{
 
     getTriArrs(x, y, z){
         const cubeCoords = this.getCubeCoorsrds(x, y, z);
-        const edgeNums = getEdgeNums(cubeCoords);
+        const edgeNumss = edgeNums(cubeCoords);
         const tris = [];
 
         const edgeCoords = this.interp == true ? {
@@ -137,10 +134,10 @@ class Cubes{
         //console.log(edgeCoords)
 
         for(let i = 0; i<14; i+=3){
-            if(edgeNums[i] != -1 || edgeNums[i+2] != -1 || edgeNums[i+2] != -1){
-                const e0 = edgeCoords[edgeNums[i]];
-                const e1 = edgeCoords[edgeNums[i+1]];
-                const e2 = edgeCoords[edgeNums[i+2]];
+            if(edgeNumss[i] != -1 || edgeNumss[i+2] != -1 || edgeNumss[i+2] != -1){
+                const e0 = edgeCoords[edgeNumss[i]];
+                const e1 = edgeCoords[edgeNumss[i+1]];
+                const e2 = edgeCoords[edgeNumss[i+2]];
 
                 tris.push([e0, e1, e2, colorSelector(y, this.h, this.colors)]);
             }
@@ -149,5 +146,3 @@ class Cubes{
         return tris;
     }
 }
-
-module.exports = Cubes;

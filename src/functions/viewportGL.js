@@ -1,6 +1,4 @@
 const { PI, sqrt } = Math
-const { multiplyMatrixAndPoint, multiplyMatrixAndPoint4x4, multiplyMatrices, MatrixXRotation, matrixTranslation, MatrixYRotation, MatrixZRotation, customVecMultiply, MatrixIdentity, Matrix_MultiplyVector, MatrixQuickInverse } = require('./matrix');
-const { vecAdd, vecCrossPru, vecDiv, vecDotPru, vecLen, vecMul, vecNorm, vecSub, matrixPointAt, Triangle_ClipAgainstPlane, recursiveMatProj } = require("./vectorCalculations");
 
 function ctg(x) { return 1 / Math.tan(x); }
 function actg(x) { return Math.PI / 2 - Math.atan(x); }
@@ -9,7 +7,7 @@ Array.prototype.insert = function ( index, item ) {
     this.splice( index, 0, item );
 };
 
-class ViewPortGL {
+class viewPortGL {
     constructor(height, width, refreshRate, fov, canvasID, ZoomOut) {
 
         /*
@@ -408,5 +406,3 @@ class ViewPortGL {
         this.gl.drawArrays(this.gl.TRIANGLES, 0, this.numOfPoints);
     }
 }
-
-module.exports = ViewPortGL;

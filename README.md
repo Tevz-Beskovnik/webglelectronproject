@@ -15,11 +15,6 @@
 * **vertex3DCalc** Takes in an array of **vertecies** that you can see in *getVal.js*, and an **x**, **y** and **z** rotation aswell as a **zoom parameter**, with those values it calculates the object in 3D space and sets the so they can be directly drawn, this function also **illuminates** the cube.
 * **draw** Takes in an array of numbers that define the rgba values of the background (array should look like this: **[r, g, b, a]**, ranging from 0 to 1), this functions draw the set triangles from the prior function to the screen.
 
-### Demo
-
-**This is what the demo looks like, it can be rotated in 3D space with the A, W, S, D keys:**
-![](https://github.com/Tevzi2/webglelectronproject/blob/master/demo1.png)
-
 ## Marching cubes alghorithm
 
 ### Dependencies

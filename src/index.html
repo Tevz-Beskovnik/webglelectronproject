@@ -2,14 +2,43 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>File Scraper</title>
+    <title>marching cubes</title>
     <link rel="stylesheet" href="index.css">
+    <script defer src="./functions/triTable.js"></script>
+    <script defer src="./functions/edge.js"></script>
+    <script defer src="./functions/vectorCalculations.js"></script>
+    <script defer src="./functions/noiseFunction.js"></script>
+    <script defer src="./functions/matrix.js"></script>
+    <script defer src="./functions/viewportGL.js"></script>
+    <script defer src="./functions/CubeTriCoords.js"></script>
+    <script defer src="./functions/perlin-noise-3d.min.js"></script>
     <script defer src="getVal.js"></script>
+    <style>
+      .inp{
+        width: 800px;
+      }
+      #densityMod{
+        width: 100%
+      }
+    </style>
   </head>
   <body>
     <canvas id="canv"></canvas>
-    <div class="kek">
-      <div id="lol" class="one"></div>
-    </div>
+    <!----<div class="sliders">
+      <p id="rangex">Noise range x: 0</p>
+      <button onclick="addRangex();">Add</button><button onclick="removeRangex();">Subtract</button>
+      <p id="rangey">Noise range y: 0</p>
+      <button onclick="addRangey();">Add</button><button onclick="removeRangey();">Subtract</button>
+      <p id="rangez">Noise range z: 0</p>
+      <button onclick="addRangez();">Add</button><button onclick="removeRangez();">Subtract</button>
+      <p id="rng">Range: 0.5</p>
+      <div class="inp">
+        <input onchange="change2(this.value, 'rng', 'Range: ');" type="range" id="densityMod" min="0" max="100">
+      </div>
+      <p id="rate">Adjust noise spacing: 0.005</p>
+      <input onchange="change(this.value, 'rate', 'Adjust noise spacing: ');" type="range" id="sampleRate" min="0" max="10">
+      <p>re-draw the cube</p>
+      <button id="Redraw" onclick="redraw();">Redraw</button>
+    </div>------>
   </body>
 </html>

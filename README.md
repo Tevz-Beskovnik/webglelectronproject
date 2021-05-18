@@ -1,3 +1,5 @@
+[comment]: <> (TODO: clean up the readme xD it's very messy im trash at making these)
+
 # viewportGL
 
 ***(please note that this demo was made in electron forge, however viewportGL.js should still work in a browser if it supports WebGL, but the marching cubes alghorithem will not poroperly work, becouse it requires the perlin noise, but i could make a workaround for it (maybe a project for the future))***
